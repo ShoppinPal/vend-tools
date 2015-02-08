@@ -1,0 +1,12 @@
+{
+  "name": "vend-tools",
+  "version": "0.1.0",
+  "dependencies": {
+    "bluebird": "2.6.0",
+    "ronin": "0.1.2",
+    "vend-nodejs-sdk": "git://github.com/shoppinpal/vend-nodejs-sdk"
+  },
+  "bin": {
+    "vend-tools": "./bin/vend-tools"
+  }
+}
