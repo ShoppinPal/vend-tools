@@ -9,9 +9,28 @@ How to Install
 1. Make sure you have `git` and `nodejs` installed (`nvm`/`nvmw` is optional)
 2. git clone https://github.com/ShoppinPal/vend-tools.git
 3. cd vend-tools
-4. npm install
-5. npm link
-6. Start using from anywhere in the command-line/terminal: `vend-tools`
+4. *[Optional]* Create `client.json` and `oauth.json` files so that yo udon't need to type in really long commands
+  1. `client.json`
+  ```
+  {
+    "token_service": "https://{DOMAIN_PREFIX}.vendhq.com/api/1.0/token",
+    "client_id": "fill it in",
+    "client_secret": "fill it in"
+  }
+  ```
+  2. `oauth.json`
+  ```
+  {
+    "access_token": "fill it in",
+    "token_type": "Bearer",
+    "refresh_token": "fill it in",
+    "domain_prefix": "fill it in"
+  }
+  ```
+
+5. npm install
+6. npm link
+7. Start using from anywhere in the command-line/terminal: `vend-tools`
 
 Pre-requisites for Windows7
 ===========================
