@@ -91,10 +91,13 @@ var runReport = function(connectionInfo, firstDayOfWeek){
       console.log('customProcessPagedResults - startDate: ', startDate.format());
       console.log('customProcessPagedResults - endDate: ', endDate.format());
       var consignmentsAfterDateX = _.filter(pagedData.consignments, function(consignment){
+        console.log('customProcessPagedResults' +
+          ' - consignment.type: ' + consignment.type +
+          ' - consignment.received_at: ' + consignment.received_at);
+        var receivedAt = null;
         if(consignment.received_at) {
-          console.log('customProcessPagedResults - consignment.received_at: ', consignment.received_at);
-          var receivedAt = moment.utc(consignment.received_at);
-          console.log('customProcessPagedResults - receivedAt: ', receivedAt.format());
+          receivedAt = moment.utc(consignment.received_at);
+          //console.log('customProcessPagedResults - receivedAt UTC format: ', receivedAt.format());
         }
         return consignment.received_at &&
           receivedAt.isAfter(startDate) &&
@@ -274,7 +277,11 @@ var runReport = function(connectionInfo, firstDayOfWeek){
                       });
                     });
                     console.log(JSON.stringify(newCostPerOutletPerSupplier,vendSdk.replacer,2));
-                    return Promise.resolve();
+
+                    console.log('saving to ' + 'report-for-' + firstDayOfWeek + '.json');
+                    return fileSystem.write(
+                      'report-for-' + firstDayOfWeek + '.json',
+                      JSON.stringify(newCostPerOutletPerSupplier,vendSdk.replacer,2));
                   })
               })
           });
@@ -284,7 +291,7 @@ var runReport = function(connectionInfo, firstDayOfWeek){
       }
     })
     .then(function() {
-      console.log('updating oauth.json ... in case there might have been changes');
+      //console.log('updating oauth.json ... in case there might have been changes');
       //console.log('Vend Token Details ' + JSON.stringify(connectionInfo,null,2));
       return fileSystem.write(
         'oauth.json',
