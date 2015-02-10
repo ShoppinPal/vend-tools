@@ -5,6 +5,8 @@
     "asking": "0.1.2",
     "bluebird": "2.6.0",
     "moment": "2.9.0",
+    "nconf": "0.7.1",
+    "q-io": "1.11.6",
     "ronin": "0.1.2",
     "underscore": "1.7.0",
     "vend-nodejs-sdk": "git://github.com/shoppinpal/vend-nodejs-sdk"
