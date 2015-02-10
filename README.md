@@ -9,7 +9,7 @@ How to Install
 1. Make sure you have `git` and `nodejs` installed (`nvm`/`nvmw` is optional)
 2. git clone https://github.com/ShoppinPal/vend-tools.git
 3. cd vend-tools
-4. *[Optional]* Create `client.json` and `oauth.json` files so that yo udon't need to type in really long commands
+4. *[Optional]* Create `client.json` and `oauth.json` files so that you don't need to type in really long commands
   1. `client.json`
   ```
   {
