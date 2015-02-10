@@ -65,7 +65,7 @@ var ReportCostsForSuppliers = Command.extend({
             }
             else {
               console.log('You selected: ' + customFirstDayOfWeek);
-              runReport(connectionInfo, firstDayOfWeek);
+              runReport(connectionInfo, customFirstDayOfWeek);
             }
           });
         }
