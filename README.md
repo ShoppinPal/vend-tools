@@ -4,6 +4,31 @@
 
 A command-line-interface (CLI) which allows you to easily perform custom tasks for your vendhq.com instance
 
+How to Install
+==============
+1. Make sure you have `git` and `nodejs` installed (`nvm`/`nvmw` is optional)
+2. git clone https://github.com/ShoppinPal/vend-tools.git
+3. cd vend-tools
+4. npm install
+5. npm link
+6. Start using from anywhere in the command-line/terminal: `vend-tools`
+
+Pre-requisites for Windows7
+===========================
+1. Download git from `http://git-scm.com/download/win` and install it
+2. Open `cmd`
+3. `git clone git://github.com/hakobera/nvmw.git "%HOMEDRIVE%%HOMEPATH%\.nvmw"`
+4. `setx /M PATH "%HOMEDRIVE%%HOMEPATH%\.nvmw;%PATH%"`
+5. quit and start a new `cmd`
+6. Run `nvmw install v0.10.33` but thefirst time fails, second time will work so run it again: `nvmw install v0.10.33`
+7. Running `node --version` should spit out: `v0.10.33`
+8. `setx /M PATH "%HOMEDRIVE%%HOMEPATH%\.nvmw\v0.10.33;%PATH%"`
+9. quit and start a new `cmd`
+
+Pre-requisites for mac
+======================
+1. *TODO: Need to write up a "spoon-feeding" version of these instructions*
+
 Simple-Legal-Speak
 ==================
 
