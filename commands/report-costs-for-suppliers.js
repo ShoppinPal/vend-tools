@@ -28,9 +28,9 @@ var ReportCostsForSuppliers = Command.extend({
       accessToken: token //nconf.get('access_token')
     };
 
-    var firstDayOfThisWeek = moment().utc().startOf('week');
-    var firstDayOfLastWeek = moment().utc().startOf('week').subtract(7, 'days');
-    var firstDayOfWeekBeforeLast = moment().utc().startOf('week').subtract(14, 'days');
+    var firstDayOfThisWeek = moment.utc().startOf('week');
+    var firstDayOfLastWeek = moment.utc().startOf('week').subtract(7, 'days');
+    var firstDayOfWeekBeforeLast = moment.utc().startOf('week').subtract(14, 'days');
 
     choose('Select the first day of a week (YYYY-MM-DD) for which this report should run: ', [
       firstDayOfThisWeek.format('YYYY-MM-DD'),
@@ -70,7 +70,6 @@ var runReport = function(connectionInfo, firstDayOfWeek){
     function customProcessPagedResults(pagedData, previousData){ // example of how to REDUCE paged data in a custom fashion
       console.log('customProcessPagedResults - pagedData.consignments.length: ', pagedData.consignments.length);
       console.log('customProcessPagedResults - pagedData.consignments.length: ', pagedData.consignments.length);
-      var moment = require('moment');
       var startDate = moment.utc(firstDayOfWeek, 'YYYY-MM-DD');
       var endDate = moment.utc(firstDayOfWeek, 'YYYY-MM-DD').add(7, 'days');
       console.log('customProcessPagedResults - startDate: ', startDate.format());
