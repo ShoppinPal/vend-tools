@@ -3,10 +3,10 @@ var choose = require('asking').choose;
 var ask = require('asking').ask;
 
 var vendSdk = require('vend-nodejs-sdk')({});
+var utils = require('./../utils/utils.js');
 var fileSystem = require('q-io/fs');
 var Promise = require('bluebird');
 var moment = require('moment');
-var nconf = require('nconf');
 var _ = require('underscore');
 
 var ReportCostsForSuppliers = Command.extend({
@@ -18,32 +18,10 @@ var ReportCostsForSuppliers = Command.extend({
   },
 
   run: function (token, domain) {
-    // (1) Check for oauth.json and client.json via nconf
-    var nconf = require('nconf');
-    nconf.file('client', { file: 'client.json' })
-      .file('oauth', { file: 'oauth.json' });
-    //console.log('nconf.get(): ', nconf.get());
+    var connectionInfo = utils.loadOauthTokens(token, domain);
+    console.log('connectionInfo: ', connectionInfo);
 
-    // (2) try to load cliend_id and client_secret and whatever else
-    var connectionInfo = {
-      domainPrefix: nconf.get('domain_prefix') || domain,
-      accessToken: nconf.get('access_token') || token,
-      // if you want auto-reties on 401, additional data is required:
-      refreshToken: nconf.get('refresh_token'),
-      vendTokenService: nconf.get('token_service'),
-      vendClientId: nconf.get('client_id'),
-      vendClientSecret: nconf.get('client_secret')
-    };
-
-    // (3) if not successful then ask for it as CLI arguments
-    if (!connectionInfo.accessToken) {
-      throw new Error('--token should be set');
-    }
-    if (!connectionInfo.domainPrefix) {
-      throw new Error('--domain should be set');
-    }
-
-    // (4) etc.
+    // etc.
     var firstDayOfThisWeek = moment.utc().startOf('week');
     var firstDayOfLastWeek = moment.utc().startOf('week').subtract(7, 'days');
     var firstDayOfWeekBeforeLast = moment.utc().startOf('week').subtract(14, 'days');
