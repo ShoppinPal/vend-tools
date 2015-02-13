@@ -8,7 +8,7 @@ var moment = require('moment');
 //var _ = require('underscore');
 
 var ListSuppliers = Command.extend({
-  desc: 'List All Suppliers',
+  desc: 'List Suppliers (200 at a time)',
 
   options: {
     token: 'string',
@@ -27,7 +27,7 @@ var ListSuppliers = Command.extend({
         return utils.updateOauthTokens(connectionInfo,response);
       })
       .then(function(response) {
-        console.log('response.suppliers.length: ', response.suppliers.length);
+        console.log('list-suppliers.js - response.suppliers.length: ', response.suppliers.length);
         //console.log('response.suppliers: ', JSON.stringify(response.suppliers,vendSdk.replacer,2));
 
         var filename = 'listSuppliers-' + moment().format('YYYY-MMM-DD-HH:mm:ss') + '.json'; // use local (not UTC) time to save
@@ -36,7 +36,7 @@ var ListSuppliers = Command.extend({
           JSON.stringify(response.suppliers,vendSdk.replacer,2));
       })
       .catch(function(e) {
-        console.error('listSuppliers.js - An unexpected error occurred: ', e);
+        console.error('list-suppliers.js - An unexpected error occurred: ', e);
       });
   }
 });

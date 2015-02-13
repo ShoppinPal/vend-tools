@@ -8,7 +8,7 @@ var moment = require('moment');
 //var _ = require('underscore');
 
 var ListProducts = Command.extend({
-  desc: 'List All Suppliers',
+  desc: 'List Products (200 at a time)',
 
   options: {
     token: 'string',
@@ -29,7 +29,7 @@ var ListProducts = Command.extend({
         return utils.updateOauthTokens(connectionInfo,response);
       })
       .then(function(response) {
-        console.log('response.products.length: ', response.products.length);
+        console.log('list-products.js - response.products.length: ', response.products.length);
         //console.log('response.products: ', JSON.stringify(response.products,vendSdk.replacer,2));
 
         var filename = 'listProducts-' + moment.utc().format('YYYY-MMM-DD-HH:mm:ss') + '.json';
@@ -38,7 +38,7 @@ var ListProducts = Command.extend({
           JSON.stringify(response.products,vendSdk.replacer,2));
       })
       .catch(function(e) {
-        console.error('listProducts.js - An unexpected error occurred: ', e);
+        console.error('list-products.js -  An unexpected error occurred: ', e);
       });
   }
 });

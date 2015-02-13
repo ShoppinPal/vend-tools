@@ -7,8 +7,8 @@ var fileSystem = require('q-io/fs');
 var moment = require('moment');
 //var _ = require('underscore');
 
-var ListProducts = Command.extend({
-  desc: 'List All Suppliers',
+var ExportAllProducts = Command.extend({
+  desc: 'Export All Products (CSV file format by default)',
 
   options: {
     token: 'string',
@@ -20,20 +20,20 @@ var ListProducts = Command.extend({
 
     return vendSdk.products.fetchAll(connectionInfo)
       .then(function(response) {
-        console.log('listProducts.js - 1st then block');
+        console.log('export-all-products.js - 1st then block');
         return utils.updateOauthTokens(connectionInfo,response);
       })
       .then(function(products) {
-        console.log('listProducts.js - 2nd then block');
+        console.log('export-all-products.js - 2nd then block');
         //console.log(products);
 
-        console.log('products.length: ', products.length);
+        console.log('export-all-products.js - products.length: ', products.length);
         //console.log('products: ', JSON.stringify(products,vendSdk.replacer,2));
 
         return vendSdk.outlets.fetch({}, connectionInfo)
           .then(function(outletsResponse) {
             //console.log('outletsResponse: ', outletsResponse);
-            console.log('outletsResponse.outlets.length: ', outletsResponse.outlets.length);
+            console.log('export-all-products.js - outletsResponse.outlets.length: ', outletsResponse.outlets.length);
             var outletsMap = _.object(_.map(outletsResponse.outlets, function (outlet) {
               return [outlet.id, outlet];
             }));
@@ -44,9 +44,9 @@ var ListProducts = Command.extend({
           });
       })
       .catch(function(e) {
-        console.error('listProducts.js - An unexpected error occurred: ', e);
+        console.error('export-all-products.js - An unexpected error occurred: ', e);
       });
   }
 });
 
-module.exports = ListProducts;
+module.exports = ExportAllProducts;
