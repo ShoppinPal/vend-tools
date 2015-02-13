@@ -34,10 +34,7 @@ var ExportAllProducts = Command.extend({
           .then(function(outletsResponse) {
             //console.log('outletsResponse: ', outletsResponse);
             console.log('export-all-products.js - outletsResponse.outlets.length: ', outletsResponse.outlets.length);
-            var outletsMap = _.object(_.map(outletsResponse.outlets, function (outlet) {
-              return [outlet.id, outlet];
-            }));
-            //console.log('outletsMap: ' + JSON.stringify(outletsMap,vendSdk.replacer,2));
+            //console.log('outletsResponse.outlets: ' + JSON.stringify(outletsResponse.outlets,vendSdk.replacer,2));
 
             utils.exportProductsToCsvFileFormat(products, outletsResponse.outlets); // TODO: promisify somehow and then return the promise
             //return Promise.resolve(); // there is no way that this line actually works
