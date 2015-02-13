@@ -4,6 +4,8 @@
   "dependencies": {
     "asking": "0.1.2",
     "bluebird": "2.6.0",
+    "dbf": "0.1.1",
+    "fast-csv": "0.5.5",
     "moment": "2.9.0",
     "nconf": "0.7.1",
     "q-io": "1.11.6",

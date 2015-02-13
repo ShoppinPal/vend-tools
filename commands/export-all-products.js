@@ -30,10 +30,18 @@ var ListProducts = Command.extend({
         console.log('products.length: ', products.length);
         //console.log('products: ', JSON.stringify(products,vendSdk.replacer,2));
 
-        var filename = 'listProducts-' + moment.utc().format('YYYY-MMM-DD-HH:mm:ss') + '.json';
-        console.log('saving to ' + filename);
-        return fileSystem.write(filename, // save to current working directory
-          JSON.stringify(products,vendSdk.replacer,2));
+        return vendSdk.outlets.fetch({}, connectionInfo)
+          .then(function(outletsResponse) {
+            //console.log('outletsResponse: ', outletsResponse);
+            console.log('outletsResponse.outlets.length: ', outletsResponse.outlets.length);
+            var outletsMap = _.object(_.map(outletsResponse.outlets, function (outlet) {
+              return [outlet.id, outlet];
+            }));
+            //console.log('outletsMap: ' + JSON.stringify(outletsMap,vendSdk.replacer,2));
+
+            utils.exportProductsToCsvFileFormat(products, outletsResponse.outlets); // TODO: promisify somehow and then return the promise
+            //return Promise.resolve(); // there is no way that this line actually works
+          });
       })
       .catch(function(e) {
         console.error('listProducts.js - An unexpected error occurred: ', e);
