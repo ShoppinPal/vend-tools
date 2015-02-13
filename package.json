@@ -1,13 +1,14 @@
 {
   "name": "vend-tools",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A command-line-interface (CLI) which allows you to easily perform custom tasks for your vendhq.com instance",
-  "version": "0.1.0",
   "author": "ShoppinPal",
-  "contributors": [{
-    "name": "Pulkit Singhal",
-    "email": "pulkit@shoppinpal.com"
-  }],
+  "contributors": [
+    {
+      "name": "Pulkit Singhal",
+      "email": "pulkit@shoppinpal.com"
+    }
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/ShoppinPal/vend-tools"
