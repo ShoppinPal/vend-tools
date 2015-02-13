@@ -20,8 +20,8 @@ report-costs-for-suppliers  Report the costs for each supplier per outlet
 How to Install
 ==============
 1. Make sure you have `git` and `nodejs` installed (`nvm`/`nvmw` is optional)
-2. git clone https://github.com/ShoppinPal/vend-tools.git
-3. cd vend-tools
+2. `git clone https://github.com/ShoppinPal/vend-tools.git`
+3. `cd vend-tools`
 4. *[Optional]* Create `client.json` and `oauth.json` files so that you don't need to type in really long commands
   1. `client.json`
   ```
@@ -41,8 +41,8 @@ How to Install
   }
   ```
 
-5. npm install
-6. npm link
+5. `npm install`
+6. `npm link`
 7. Start using from anywhere in the command-line/terminal: `vend-tools`
 
 Pre-requisites for Windows7
