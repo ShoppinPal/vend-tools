@@ -32,7 +32,7 @@ var ListProducts = Command.extend({
         console.log('list-products.js - response.products.length: ', response.products.length);
         //console.log('response.products: ', JSON.stringify(response.products,vendSdk.replacer,2));
 
-        var filename = 'listProducts-' + moment.utc().format('YYYY-MMM-DD-HH:mm:ss') + '.json';
+        var filename = 'listProducts-' + moment.utc().format('YYYY-MMM-DD_HH-mm-ss') + '.json';
         console.log('saving to ' + filename);
         return fileSystem.write(filename, // save to current working directory
           JSON.stringify(response.products,vendSdk.replacer,2));

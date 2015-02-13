@@ -124,7 +124,7 @@ var exportProductsToDbfFileFormat = function(products){
   var buf = dbf.structure(neoProducts);
 
   //fs.writeFileSync('foo.dbf', toBuffer(buf.buffer));
-  var filename = 'listProducts-' + moment.utc().format('YYYY-MMM-DD-HH:mm:ss') + '.dbf';
+  var filename = 'listProducts-' + moment.utc().format('YYYY-MMM-DD_HH-mm-ss') + '.dbf';
   console.log('saving to ' + filename);
   return fileSystem.write(filename, // save to current working directory
     toBuffer(buf.buffer));
@@ -140,7 +140,7 @@ var toBuffer = function (ab) {
 };
 
 var exportProductsToJsonFileFormat = function(products){
-  var filename = 'listProducts-' + moment.utc().format('YYYY-MMM-DD-HH:mm:ss') + '.json';
+  var filename = 'listProducts-' + moment.utc().format('YYYY-MMM-DD_HH-mm-ss') + '.json';
   console.log('saving to ' + filename);
   return fileSystem.write(filename, // save to current working directory
     JSON.stringify(products,vendSdk.replacer,2));
@@ -199,7 +199,7 @@ var exportProductsToCsvFileFormat = function(products, outlets){
       return neoProduct;
     });
 
-  var filename = 'listProducts-' + moment.utc().format('YYYY-MMM-DD-HH:mm:ss') + '.csv';
+  var filename = 'listProducts-' + moment.utc().format('YYYY-MMM-DD_HH-mm-ss') + '.csv';
   console.log('saving to ' + filename);
   var writableStream = fs.createWriteStream(filename);
   writableStream.on('open', function(fd){

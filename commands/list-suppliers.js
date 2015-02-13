@@ -30,7 +30,7 @@ var ListSuppliers = Command.extend({
         console.log('list-suppliers.js - response.suppliers.length: ', response.suppliers.length);
         //console.log('response.suppliers: ', JSON.stringify(response.suppliers,vendSdk.replacer,2));
 
-        var filename = 'listSuppliers-' + moment().format('YYYY-MMM-DD-HH:mm:ss') + '.json'; // use local (not UTC) time to save
+        var filename = 'listSuppliers-' + moment().format('YYYY-MMM-DD_HH-mm-ss') + '.json'; // use local (not UTC) time to save
         console.log('saving to ' + filename);
         return fileSystem.write(filename, // save to current working directory
           JSON.stringify(response.suppliers,vendSdk.replacer,2));
