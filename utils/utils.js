@@ -202,11 +202,17 @@ var exportProductsToCsvFileFormat = function(products, outlets){
   var filename = 'listProducts-' + moment.utc().format('YYYY-MMM-DD-HH:mm:ss') + '.csv';
   console.log('saving to ' + filename);
   var writableStream = fs.createWriteStream(filename);
-  writableStream.on('finish', function(){
-    console.log('DONE!');
+  writableStream.on('open', function(fd){
+    console.log('will connect csvStream to writableStream');
+    csvStream.pipe(writableStream);
   });
-
-  csvStream.pipe(writableStream); // connect the streams
+  writableStream.on('error', function(error){
+    console.log('something went wrong with the writableStream');
+    console.log(error);
+  });
+  writableStream.on('finish', function(){
+    console.log('finished writing to ' + filename);
+  });
 
   _.each(products,function(product){
     csvStream.write(product);
