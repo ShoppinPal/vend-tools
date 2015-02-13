@@ -179,6 +179,7 @@ var exportProductsToCsvFileFormat = function(products, outlets){
         'tags','supply_price','retail_price',
         'account_code','account_code_purchase','brand_name',
         'supplier_name','supplier_code','active','track_inventory');
+      neoProduct['retail_price'] = product['price'];
       if(product.inventory){
         _.each(product.inventory, function(inventory){
           if(inventory.count !== undefined  && inventory.count !== null) {
