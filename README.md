@@ -37,6 +37,9 @@ Pre-requisites for Windows7
 1. Download git from `http://git-scm.com/download/win` and install it
 2. Open `cmd`
 3. `git clone git://github.com/hakobera/nvmw.git "%HOMEDRIVE%%HOMEPATH%\.nvmw"`
+  1. If you are setup such that there is a `c:\` drive and a `u:\` user-drive mapped together then do NOT use `%HOMEDRIVE%%HOMEPATH%`
+  2. Instead stick with absolute paths like `c:\whatever\.nvmw` etc.
+  3. And run `cmd` as an administrator
 4. `setx /M PATH "%HOMEDRIVE%%HOMEPATH%\.nvmw;%PATH%"`
 5. quit and start a new `cmd`
 6. Run `nvmw install v0.10.33` but thefirst time fails, second time will work so run it again: `nvmw install v0.10.33`
