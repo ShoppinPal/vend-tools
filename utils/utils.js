@@ -4,6 +4,7 @@ var moment = require('moment');
 var _ = require('underscore');
 var nconf = require('nconf');
 var path = require('path');
+var vendSdk = require('vend-nodejs-sdk')({});
 
 var updateOauthTokens = function(connectionInfo, response){
   console.log('updating oauth.json ... in case there might have been token changes');

@@ -3,7 +3,7 @@ var Command = require('ronin').Command;
 var vendSdk = require('vend-nodejs-sdk')({});
 var utils = require('./../utils/utils.js');
 var fileSystem = require('q-io/fs');
-//var Promise = require('bluebird');
+var Promise = require('bluebird');
 var moment = require('moment');
 //var _ = require('underscore');
 
@@ -19,12 +19,19 @@ var ExportAllProducts = Command.extend({
     var connectionInfo = utils.loadOauthTokens(token, domain);
 
     return vendSdk.products.fetchAll(connectionInfo)
-      .then(function(response) {
+      .then(function(products) {
         console.log('export-all-products.js - 1st then block');
-        return utils.updateOauthTokens(connectionInfo,response);
+        return utils.updateOauthTokens(connectionInfo,products);
       })
       .then(function(products) {
         console.log('export-all-products.js - 2nd then block');
+        return utils.exportProductsToJsonFileFormat(products)
+          .then(function() {
+            return Promise.resolve(products);
+          });
+      })
+      .then(function(products) {
+        console.log('export-all-products.js - 3rd then block');
         //console.log(products);
 
         console.log('export-all-products.js - products.length: ', products.length);
