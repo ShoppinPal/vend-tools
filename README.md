@@ -4,6 +4,19 @@
 
 A command-line-interface (CLI) which allows you to easily perform custom tasks for your vendhq.com instance
 
+```
+$ vend-tools 
+Usage: vend-tools COMMAND [OPTIONS]
+
+  This command-line-interface (CLI) allows you to easily perform custom tasks for your vendhq.com instance.
+
+Available commands:
+
+export-all-products         Export All Products (CSV file format by default)
+report-costs-for-suppliers  Report the costs for each supplier per outlet
+```
+
+
 How to Install
 ==============
 1. Make sure you have `git` and `nodejs` installed (`nvm`/`nvmw` is optional)
@@ -61,4 +74,4 @@ This module is being written out of sheer respect for Vend's uncanny success at 
 Who are we?
 ===========
 
-ShoppinPal is a team of engineers and product guys with background in developing core systems at well-known Silicon Valley companies. We have deep expertise with Vend APIs. Several retailers use our ecommerce add-on, which works beautifully with Vend. We would love to assist you with any custom development needs that help you get the most out of Vend. We are listed in http://www.vendhq.com/expert-directory
+ShoppinPal is a team of engineers and product guys with background in developing core systems at well-known Silicon Valley companies. We have deep expertise with Vend APIs. Several retailers use our ecommerce add-on, which works beautifully with Vend. We would love to assist you with any custom development needs that help you get the most out of Vend. We are listed in http://www.vendhq.com/expert-directory?region=0&service=12
