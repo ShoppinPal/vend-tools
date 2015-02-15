@@ -25,7 +25,7 @@ var ExportAllProducts = Command.extend({
       })
       .then(function(products) {
         console.log('export-all-products.js - 2nd then block');
-        return utils.exportProductsToJsonFileFormat(products)
+        return utils.exportToJsonFileFormat('export-all-products', products)
           .then(function() {
             return Promise.resolve(products);
           });

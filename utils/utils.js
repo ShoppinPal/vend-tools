@@ -140,11 +140,11 @@ var toBuffer = function (ab) {
   return buffer;
 };
 
-var exportProductsToJsonFileFormat = function(products){
-  var filename = 'listProducts-' + moment.utc().format('YYYY-MMM-DD_HH-mm-ss') + '.json';
+var exportToJsonFileFormat = function(commandName, data){
+  var filename = commandName + '-' + moment.utc().format('YYYY-MMM-DD_HH-mm-ss') + '.json';
   console.log('saving to ' + filename);
   return fileSystem.write(filename, // save to current working directory
-    JSON.stringify(products,vendSdk.replacer,2));
+    JSON.stringify(data,vendSdk.replacer,2));
 };
 
 var exportProductsToCsvFileFormat = function(products, outlets){
@@ -225,6 +225,6 @@ var exportProductsToCsvFileFormat = function(products, outlets){
 
 exports.updateOauthTokens = updateOauthTokens;
 exports.loadOauthTokens = loadOauthTokens;
+exports.exportToJsonFileFormat = exportToJsonFileFormat;
 exports.exportProductsToDbfFileFormat = exportProductsToDbfFileFormat;
-exports.exportProductsToJsonFileFormat = exportProductsToJsonFileFormat;
 exports.exportProductsToCsvFileFormat = exportProductsToCsvFileFormat;
