@@ -16,35 +16,6 @@ export-all-products         Export All Products (CSV file format by default)
 report-costs-for-suppliers  Report the costs for each supplier per outlet
 ```
 
-
-How to Install
-==============
-1. Make sure you have `git` and `nodejs` installed (`nvm`/`nvmw` is optional)
-2. `git clone https://github.com/ShoppinPal/vend-tools.git`
-3. `cd vend-tools`
-4. *[Optional]* Create `client.json` and `oauth.json` files so that you don't need to type in really long commands
-  1. `client.json`
-  ```
-  {
-    "token_service": "https://{DOMAIN_PREFIX}.vendhq.com/api/1.0/token",
-    "client_id": "fill it in",
-    "client_secret": "fill it in"
-  }
-  ```
-  2. `oauth.json`
-  ```
-  {
-    "access_token": "fill it in",
-    "token_type": "Bearer",
-    "refresh_token": "fill it in",
-    "domain_prefix": "fill it in"
-  }
-  ```
-
-5. `npm install`
-6. `npm link`
-7. Start using from anywhere in the command-line/terminal: `vend-tools`
-
 Pre-requisites for Windows7
 ===========================
 1. Download git from `http://git-scm.com/download/win` and install it
@@ -63,6 +34,35 @@ Pre-requisites for Windows7
 Pre-requisites for mac
 ======================
 1. *TODO: Need to write up a "spoon-feeding" version of these instructions*
+
+How to Install
+==============
+1. Make sure you have `git` and `nodejs` installed (`nvm`/`nvmw` is optional)
+2. `git clone https://github.com/ShoppinPal/vend-tools.git`
+3. `cd vend-tools`
+4. *[Optional]* Create `client.json` and `oauth.json` files so that you don't need to type in really long commands
+  1. If you need help getting Vend OAuth tokens, you may refer to our OAuth example https://github.com/ShoppinPal/vend-oauth-example
+  2. Sample `client.json` file content:
+  ```
+  {
+    "token_service": "https://{DOMAIN_PREFIX}.vendhq.com/api/1.0/token",
+    "client_id": "fill it in",
+    "client_secret": "fill it in"
+  }
+  ```
+  3. Sample `oauth.json` file content:
+  ```
+  {
+    "access_token": "fill it in",
+    "token_type": "Bearer",
+    "refresh_token": "fill it in",
+    "domain_prefix": "fill it in"
+  }
+  ```
+
+5. `npm install`
+6. `npm link`
+7. Start using from anywhere in the command-line/terminal: `vend-tools`
 
 Simple-Legal-Speak
 ==================
