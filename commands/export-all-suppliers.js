@@ -6,7 +6,7 @@ var Promise = require('bluebird');
 var path = require('path');
 
 var ExportAllSuppliers = Command.extend({
-  desc: 'Export All Suppliers (JSON file format by default)',
+  desc: 'Export All Suppliers (CSV file format by default)',
 
   options: {
     token: 'string',
@@ -32,6 +32,16 @@ var ExportAllSuppliers = Command.extend({
           .then(function() {
             return Promise.resolve(suppliers);
           });
+      })
+      .then(function(suppliers) {
+        console.log(commandName + ' > 3rd then block');
+        //console.log(suppliers);
+
+        console.log(commandName + ' > suppliers.length: ', suppliers.length);
+        //console.log('products: ', JSON.stringify(suppliers,vendSdk.replacer,2));
+
+        utils.exportToCsvFileFormat(commandName, suppliers); // TODO: promisify somehow and then return the promise
+        //return Promise.resolve(); // there is no way that this line actually works
       })
       .catch(function(e) {
         console.error(commandName + ' > An unexpected error occurred: ', e);

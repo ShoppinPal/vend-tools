@@ -152,6 +152,61 @@ var exportToJsonFileFormat = function(commandName, data){
   }
 };
 
+var flatten = function(obj, path, result) {
+  var key, val, _path;
+  path = path || [];
+  result = result || {};
+  for (key in obj) {
+    val = obj[key];
+    _path = path.concat([key]);
+    if (val instanceof Object) {
+      flatten(val, _path, result);
+    } else {
+      result[_path.join('.')] = val;
+    }
+  }
+  return result;
+};
+
+var exportToCsvFileFormat = function(commandName, data){
+  if(data !== undefined  && data !== null) {
+    var csv = require('fast-csv');
+    var fs = require('fs');
+
+    var csvStream = csv
+      .createWriteStream({headers: true})
+      .transform(function(entry){
+        // flattens json by appending key.paths together
+        return flatten(entry);
+      });
+
+    var filename = commandName + '-' + moment.utc().format('YYYY-MMM-DD_HH-mm-ss') + '.csv';
+    console.log('saving to ' + filename);
+    var writableStream = fs.createWriteStream(filename);
+    writableStream.on('open', function(fd){
+      console.log('will connect csvStream to writableStream');
+      csvStream.pipe(writableStream);
+    });
+    writableStream.on('error', function(error){
+      console.log('something went wrong with the writableStream');
+      console.log(error);
+    });
+    writableStream.on('finish', function(){
+      console.log('finished writing to ' + filename);
+    });
+
+    _.each(data,function(entry){
+      csvStream.write(entry);
+    });
+    csvStream.end();
+
+    // TODO: return a Promise
+  }
+  else{
+    return Promise.reject('no data provided for exportToCsvFileFormat()');
+  }
+};
+
 var exportProductsToCsvFileFormat = function(products, outlets){
   var csv = require('fast-csv');
   var fs = require('fs');
@@ -231,5 +286,6 @@ var exportProductsToCsvFileFormat = function(products, outlets){
 exports.updateOauthTokens = updateOauthTokens;
 exports.loadOauthTokens = loadOauthTokens;
 exports.exportToJsonFileFormat = exportToJsonFileFormat;
-exports.exportProductsToDbfFileFormat = exportProductsToDbfFileFormat;
+exports.exportToCsvFileFormat = exportToCsvFileFormat;
 exports.exportProductsToCsvFileFormat = exportProductsToCsvFileFormat;
+exports.exportProductsToDbfFileFormat = exportProductsToDbfFileFormat;
