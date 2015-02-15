@@ -141,10 +141,15 @@ var toBuffer = function (ab) {
 };
 
 var exportToJsonFileFormat = function(commandName, data){
-  var filename = commandName + '-' + moment.utc().format('YYYY-MMM-DD_HH-mm-ss') + '.json';
-  console.log('saving to ' + filename);
-  return fileSystem.write(filename, // save to current working directory
-    JSON.stringify(data,vendSdk.replacer,2));
+  if(data !== undefined  && data !== null) {
+    var filename = commandName + '-' + moment.utc().format('YYYY-MMM-DD_HH-mm-ss') + '.json';
+    console.log('saving to ' + filename);
+    return fileSystem.write(filename, // save to current working directory
+      JSON.stringify(data,vendSdk.replacer,2));
+  }
+  else{
+    return Promise.reject('no data provided for exportToJsonFileFormat()');
+  }
 };
 
 var exportProductsToCsvFileFormat = function(products, outlets){
