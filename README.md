@@ -13,6 +13,12 @@ Usage: vend-tools COMMAND [OPTIONS]
 Available commands:
 
 export-all-products         Export All Products (CSV file format by default)
+export-all-suppliers        Export All Suppliers (CSV file format by default)
+fetch-product-by-id         Fetches a product by id
+fetch-product-by-sku        Fetches a product by SKU
+fetch-product-by-handle     Fetches a product by handle
+list-products               List Products (200 at a time)
+list-suppliers              List Suppliers (200 at a time)
 report-costs-for-suppliers  Report the costs for each supplier per outlet
 ```
 
