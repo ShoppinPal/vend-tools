@@ -10,6 +10,8 @@ var moment = require('moment');
 //var _ = require('underscore');
 var path = require('path');
 
+var commandName = path.basename(__filename, '.js');
+
 var GenerateStockOrder = Command.extend({
   desc: 'Generate a stock order in Vend, based on sales history',
 
@@ -23,8 +25,6 @@ var GenerateStockOrder = Command.extend({
   },
 
   run: function (token, domain, orderName, outletId, supplierId) {
-    var commandName = path.basename(__filename, '.js');
-
     var connectionInfo = utils.loadOauthTokens(token, domain);
     if (!orderName) {
       throw new Error('--orderName should be set');
@@ -41,10 +41,10 @@ var GenerateStockOrder = Command.extend({
     var aMonthAgo = moment.utc().subtract(1, 'months');
     var twoMonthsAgo = moment.utc().subtract(2, 'months');
     var intervalOptions = [
-      aWeekAgo.format('YYYY-MM-DD'),
-      twoWeeksAgo.format('YYYY-MM-DD'),
-      aMonthAgo.format('YYYY-MM-DD'),
-      twoMonthsAgo.format('YYYY-MM-DD')
+      aWeekAgo,
+      twoWeeksAgo,
+      aMonthAgo,
+      twoMonthsAgo
     ];
     var intervalOptionsForDisplay = [
       'Starting a week ago (' + aWeekAgo.format('YYYY-MM-DD') + ')',
@@ -60,14 +60,15 @@ var GenerateStockOrder = Command.extend({
           console.log('Incorrect selection! Please choose an option between 1 - ' + intervalOptions.length);
         }
         else {
-          console.log('startAnalyzingSalesHistorySince: ' + intervalOptions[indexOfSelectedValue]);
-          //runMe(connectionInfo, orderName, outletId, supplierId);
+          var since = intervalOptions[indexOfSelectedValue];
+          console.log('startAnalyzingSalesHistorySince: ' + since.format('YYYY-MM-DD'));
+          runMe(connectionInfo, orderName, outletId, supplierId, since);
         }
       });
   }
 });
 
-var runMe = function(connectionInfo, orderName, outletId, supplierId){
+var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
   var args = vendSdk.args.consignments.stockOrders.create();
   args.name.value = orderName;
   args.outletId.value = outletId;
