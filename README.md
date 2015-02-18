@@ -28,13 +28,13 @@ Pre-requisites for Windows7
 2. Open `cmd`
 3. `git clone git://github.com/hakobera/nvmw.git "%HOMEDRIVE%%HOMEPATH%\.nvmw"`
   1. If you are setup such that there is a `c:\` drive and a `u:\` user-drive mapped together then do NOT use `%HOMEDRIVE%%HOMEPATH%`
-  2. Instead stick with absolute paths like `c:\whatever\.nvmw` etc.
+  2. Instead stick with absolute paths like `c:\dev\.nvmw` etc.
   3. And run `cmd` as an administrator
-4. `setx /M PATH "%HOMEDRIVE%%HOMEPATH%\.nvmw;%PATH%"`
+4. `setx /M PATH "%HOMEDRIVE%%HOMEPATH%\.nvmw;%PATH%"` or `setx /M PATH "c:\dev\.nvmw;%PATH%"`
 5. quit and start a new `cmd`
 6. Run `nvmw install v0.10.33` but thefirst time fails, second time will work so run it again: `nvmw install v0.10.33`
 7. Running `node --version` should spit out: `v0.10.33`
-8. `setx /M PATH "%HOMEDRIVE%%HOMEPATH%\.nvmw\v0.10.33;%PATH%"`
+8. `setx /M PATH "%HOMEDRIVE%%HOMEPATH%\.nvmw\v0.10.33;%PATH%"` or `setx /M PATH "c:\dev\.nvmw\v0.10.33;%PATH%"`
 9. quit and start a new `cmd`
 
 Pre-requisites for mac
