@@ -24,6 +24,10 @@ report-costs-for-suppliers  Report the costs for each supplier per outlet
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ShoppinPal/vend-tools?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
+1. Ask for help with installation,
+2. Discuss new features you're looking for,
+3. Let us know if we met or exceeded expentations!
+
 Pre-requisites for Windows7
 ===========================
 1. Download git from `http://git-scm.com/download/win` and install it
