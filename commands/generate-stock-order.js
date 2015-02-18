@@ -1,16 +1,38 @@
 var Command = require('ronin').Command;
-var choose = require('asking').choose;
-var ask = require('asking').ask;
+
+var Promise = require('bluebird');
+var asking = Promise.promisifyAll(require('asking'));
+//var choose = require('asking').choose;
+//var ask = require('asking').ask;
 
 var vendSdk = require('vend-nodejs-sdk')({});
 var utils = require('./../utils/utils.js');
 var fileSystem = require('q-io/fs');
-var Promise = require('bluebird');
+
 var moment = require('moment');
 //var _ = require('underscore');
 var path = require('path');
 
+// Global variable for logging
 var commandName = path.basename(__filename, '.js');
+
+// Global variables for interval
+var aWeekAgo = moment.utc().subtract(1, 'weeks');
+var twoWeeksAgo = moment.utc().subtract(2, 'weeks');
+var aMonthAgo = moment.utc().subtract(1, 'months');
+var twoMonthsAgo = moment.utc().subtract(2, 'months');
+var intervalOptions = [
+  aWeekAgo,
+  twoWeeksAgo,
+  aMonthAgo,
+  twoMonthsAgo
+];
+var intervalOptionsForDisplay = [
+    'Starting a week ago (' + aWeekAgo.format('YYYY-MM-DD') + ')',
+    'Starting two weeks ago (' + twoWeeksAgo.format('YYYY-MM-DD') + ')',
+    'Starting a month ago (' + aMonthAgo.format('YYYY-MM-DD') + ')',
+    'Starting two months ago (' + twoMonthsAgo.format('YYYY-MM-DD') + ')'
+];
 
 var GenerateStockOrder = Command.extend({
   desc: 'Generate a stock order in Vend, based on sales history',
@@ -24,7 +46,7 @@ var GenerateStockOrder = Command.extend({
     interval: 'string'
   },
 
-  run: function (token, domain, orderName, outletId, supplierId) {
+  run: function (token, domain, orderName, outletId, supplierId, interval) {
     var connectionInfo = utils.loadOauthTokens(token, domain);
     if (!orderName) {
       throw new Error('--orderName should be set');
@@ -35,38 +57,55 @@ var GenerateStockOrder = Command.extend({
     if (!supplierId) {
       throw new Error('--supplierId should be set');
     }
-
-    var aWeekAgo = moment.utc().subtract(1, 'weeks');
-    var twoWeeksAgo = moment.utc().subtract(2, 'weeks');
-    var aMonthAgo = moment.utc().subtract(1, 'months');
-    var twoMonthsAgo = moment.utc().subtract(2, 'months');
-    var intervalOptions = [
-      aWeekAgo,
-      twoWeeksAgo,
-      aMonthAgo,
-      twoMonthsAgo
-    ];
-    var intervalOptionsForDisplay = [
-      'Starting a week ago (' + aWeekAgo.format('YYYY-MM-DD') + ')',
-      'Starting two weeks ago (' + twoWeeksAgo.format('YYYY-MM-DD') + ')',
-      'Starting a month ago (' + aMonthAgo.format('YYYY-MM-DD') + ')',
-      'Starting two months ago (' + twoMonthsAgo.format('YYYY-MM-DD') + ')'
-    ];
-
-    choose('How far back from today should the sales history be analyzed?',
-      intervalOptionsForDisplay,
-      function (err, startAnalyzingSalesHistorySince, indexOfSelectedValue) {
-        if (indexOfSelectedValue === undefined) {
-          console.log('Incorrect selection! Please choose an option between 1 - ' + intervalOptions.length);
-        }
-        else {
-          var since = intervalOptions[indexOfSelectedValue];
-          console.log('startAnalyzingSalesHistorySince: ' + since.format('YYYY-MM-DD'));
-          runMe(connectionInfo, orderName, outletId, supplierId, since);
-        }
+    return validateInterval(interval)
+      .then(function(since){
+        runMe(connectionInfo, orderName, outletId, supplierId, since);
       });
   }
 });
+
+var validateInterval = function(interval, next) {
+  if (interval) {
+    var since = null;
+    switch(interval) {
+      case '1w':
+        since = intervalOptions[0];
+        break;
+      case '2w':
+        since = intervalOptions[1];
+        break;
+      case '1m':
+        since = intervalOptions[2];
+        break;
+      case '2m':
+        since = intervalOptions[3];
+        break;
+      default:
+        throw new Error('--interval should be set as 1w or 2w or 1m or 2m');
+    }
+    console.log('startAnalyzingSalesHistorySince: ' + since.format('YYYY-MM-DD'));
+    return Promise.resolve(since);
+  }
+  else {
+    return chooseInterval();
+  }
+};
+
+var chooseInterval = function(){
+  return asking.chooseAsync('How far back from today should the sales history be analyzed?', intervalOptionsForDisplay)
+    .then(function (resolvedResults/*err, startAnalyzingSalesHistorySince, indexOfSelectedValue*/) {
+      var startAnalyzingSalesHistorySince = resolvedResults[0];
+      var indexOfSelectedValue = resolvedResults[1];
+      var since = intervalOptions[indexOfSelectedValue];
+      console.log('startAnalyzingSalesHistorySince: ' + since.format('YYYY-MM-DD'));
+      return Promise.resolve(since);
+    })
+    .catch(function(e) {
+      //console.error(commandName + ' > An unexpected error occurred: ', e);
+      console.log('Incorrect selection! Please choose an option between 1 - ' + intervalOptions.length);
+      return chooseInterval();
+    });
+};
 
 var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
   var args = vendSdk.args.consignments.stockOrders.create();
