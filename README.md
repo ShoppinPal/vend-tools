@@ -1,7 +1,5 @@
 # vend-tools
 
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ShoppinPal/vend-tools?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 A command-line-interface (CLI) which allows you to easily perform custom tasks for your vendhq.com instance
 
 ```
@@ -21,6 +19,10 @@ list-products               List Products (200 at a time)
 list-suppliers              List Suppliers (200 at a time)
 report-costs-for-suppliers  Report the costs for each supplier per outlet
 ```
+
+# Need Help?
+
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ShoppinPal/vend-tools?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Pre-requisites for Windows7
 ===========================
