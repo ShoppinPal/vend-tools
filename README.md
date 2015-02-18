@@ -55,8 +55,13 @@ How to Install
 2. `git clone https://github.com/ShoppinPal/vend-tools.git`
 3. `cd vend-tools`
 4. *[Optional]* Create `client.json` and `oauth.json` files so that you don't need to type in really long commands
-  1. If you need help getting Vend OAuth tokens, you may refer to our OAuth example https://github.com/ShoppinPal/vend-oauth-example
-  2. Sample `client.json` file content:
+  1. You need your own vend credentials to make vend-tools work so goto https://developers.vendhq.com/ and `Register as a developer` then create a new application for yourself at https://developers.vendhq.com/developer/applications
+  2. Now you have two choices:
+    1. Use the tooling provided by the runscope website for getting Vend OAuth tokens: https://www.runscope.com/oauth2_tool
+      1. Authorize URL: `https://{DOMAIN_PREFIX}.vendhq.com/connect`      
+      2. Access Token URL: `https://{DOMAIN_PREFIX}.vendhq.com/api/1.0/token`
+    2. Or, you may refer to our example https://github.com/ShoppinPal/vend-oauth-example
+  3. Afterwards, the following sample `client.json` file template can be filled out and used:
   ```
   {
     "token_service": "https://{DOMAIN_PREFIX}.vendhq.com/api/1.0/token",
@@ -64,7 +69,7 @@ How to Install
     "client_secret": "fill it in"
   }
   ```
-  3. Sample `oauth.json` file content:
+  4. Here's a sample `oauth.json` file template for you to fill out and use:
   ```
   {
     "access_token": "fill it in",
