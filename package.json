@@ -1,6 +1,6 @@
 {
   "name": "vend-tools",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "A command-line-interface (CLI) which allows you to easily perform custom tasks for your vendhq.com instance",
   "author": "ShoppinPal",
   "contributors": [
