@@ -1,8 +1,8 @@
 var fileSystem = require('q-io/fs');
+var fs = require('fs');
 var Promise = require('bluebird');
 var moment = require('moment');
 var _ = require('underscore');
-var nconf = require('nconf');
 var path = require('path');
 var vendSdk = require('vend-nodejs-sdk')({});
 
@@ -27,6 +27,7 @@ var updateOauthTokens = function(connectionInfo, response){
 // TODO: add a CLI spinner to indicate file is being saved? Because sometimes the pauses may appear long?
 var loadOauthTokens = function(token, domain){
   // (1) Check for oauth.json and client.json via nconf
+  var nconf = require('nconf');
   nconf.file('client', { file: path.join(__dirname, '..', 'client.json') })
     .file('oauth', { file: path.join(__dirname, '..', 'oauth.json') });
   //console.log('nconf.get(): ', nconf.get());
@@ -140,14 +141,45 @@ var toBuffer = function (ab) {
   return buffer;
 };
 
+var getAbsoluteFilename = function(commandName){
+  var nconf = require('nconf');
+  nconf.file('settings', { file: path.join(__dirname, '..', 'settings.json') });
+
+  var defaultOutputDirectory = nconf.get('defaultOutputDirectory');
+  var timestampFiles = nconf.get('timestampFiles');
+
+  var filename = setFilename(commandName, timestampFiles);
+
+  if (defaultOutputDirectory && defaultOutputDirectory.trim().length > 0) {
+    if (!fs.existsSync(defaultOutputDirectory)){
+      fs.mkdirSync(defaultOutputDirectory);
+    }
+    var stats = fs.statSync(defaultOutputDirectory);
+    if (stats.isDirectory()) {
+      filename = path.join(defaultOutputDirectory, setFilename(commandName, timestampFiles));
+    }
+  }
+
+  return filename;
+};
+
+var setFilename = function(commandName, timestampFiles){
+  if (timestampFiles) {
+    return commandName + '-' + moment.utc().format('YYYY-MMM-DD_HH-mm-ss') + '.json';
+  }
+  else {
+    return commandName + '.json';
+  }
+};
+
 var exportToJsonFileFormat = function(commandName, data){
   if(data !== undefined  && data !== null) {
-    var filename = commandName + '-' + moment.utc().format('YYYY-MMM-DD_HH-mm-ss') + '.json';
+    var filename = getAbsoluteFilename(commandName);
     console.log('saving to ' + filename);
     return fileSystem.write(filename, // save to current working directory
       JSON.stringify(data,vendSdk.replacer,2));
   }
-  else{
+  else {
     return Promise.reject('no data provided for exportToJsonFileFormat()');
   }
 };
