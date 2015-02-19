@@ -81,7 +81,8 @@ How to Install
 
 5. `npm install`
 6. `npm link`
-7. Start using from anywhere in the command-line/terminal: `vend-tools`
+7. *[Optional]* Edit `settings.json` if you want to set a default output directory etc.
+8. Start using from anywhere in the command-line/terminal: `vend-tools`
 
 Simple-Legal-Speak
 ==================
