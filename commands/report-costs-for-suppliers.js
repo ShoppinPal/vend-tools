@@ -13,13 +13,13 @@ var ReportCostsForSuppliers = Command.extend({
   desc: 'Report the costs for each supplier per outlet',
 
   options: {
-    token: 'string',
-    domain: 'string'
   },
 
-  run: function (token, domain) {
+  run: function () {
+    var token = this.global.token || this.global.t;
+    var domain = this.global.domain || this.global.d;
+
     var connectionInfo = utils.loadOauthTokens(token, domain);
-    console.log('connectionInfo: ', connectionInfo);
 
     // etc.
     var firstDayOfThisWeek = moment.utc().startOf('week');

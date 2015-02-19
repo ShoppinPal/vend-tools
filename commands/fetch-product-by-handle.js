@@ -10,13 +10,13 @@ var FetchProductByHandle = Command.extend({
   desc: 'Fetches a product by handle',
 
   options: {
-    token: 'string',
-    domain: 'string',
     handle: 'string'
   },
 
-  run: function (token, domain, handle) {
+  run: function (handle) {
     var commandName = path.basename(__filename, '.js');
+    var token = this.global.token || this.global.t;
+    var domain = this.global.domain || this.global.d;
 
     if (!handle) {
       throw new Error('--handle should be set');

@@ -11,11 +11,13 @@ var ListProducts = Command.extend({
   desc: 'List Products (200 at a time)',
 
   options: {
-    token: 'string',
-    domain: 'string'
   },
 
-  run: function (token, domain) {
+  run: function () {
+    var commandName = path.basename(__filename, '.js');
+    var token = this.global.token || this.global.t;
+    var domain = this.global.domain || this.global.d;
+
     var connectionInfo = utils.loadOauthTokens(token, domain);
 
     var args = vendSdk.args.products.fetch();
@@ -29,7 +31,7 @@ var ListProducts = Command.extend({
         return utils.updateOauthTokens(connectionInfo,response);
       })
       .then(function(response) {
-        console.log('list-products.js - response.products.length: ', response.products.length);
+        console.log(commandName + ' > response.products.length: ', response.products.length);
         //console.log('response.products: ', JSON.stringify(response.products,vendSdk.replacer,2));
 
         var filename = 'listProducts-' + moment.utc().format('YYYY-MMM-DD_HH-mm-ss') + '.json';
@@ -38,7 +40,7 @@ var ListProducts = Command.extend({
           JSON.stringify(response.products,vendSdk.replacer,2));
       })
       .catch(function(e) {
-        console.error('list-products.js -  An unexpected error occurred: ', e);
+        console.error(commandName + ' > An unexpected error occurred: ', e);
       });
   }
 });

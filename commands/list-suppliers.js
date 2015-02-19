@@ -11,11 +11,13 @@ var ListSuppliers = Command.extend({
   desc: 'List Suppliers (200 at a time)',
 
   options: {
-    token: 'string',
-    domain: 'string'
   },
 
-  run: function (token, domain) {
+  run: function () {
+    var commandName = path.basename(__filename, '.js');
+    var token = this.global.token || this.global.t;
+    var domain = this.global.domain || this.global.d;
+
     var connectionInfo = utils.loadOauthTokens(token, domain);
 
     var args = {
@@ -27,16 +29,16 @@ var ListSuppliers = Command.extend({
         return utils.updateOauthTokens(connectionInfo,response);
       })
       .then(function(response) {
-        console.log('list-suppliers.js - response.suppliers.length: ', response.suppliers.length);
+        console.log(commandName + ' > response.suppliers.length: ', response.suppliers.length);
         //console.log('response.suppliers: ', JSON.stringify(response.suppliers,vendSdk.replacer,2));
 
         var filename = 'listSuppliers-' + moment().format('YYYY-MMM-DD_HH-mm-ss') + '.json'; // use local (not UTC) time to save
-        console.log('saving to ' + filename);
+        console.log(commandName + ' > saving to ' + filename);
         return fileSystem.write(filename, // save to current working directory
           JSON.stringify(response.suppliers,vendSdk.replacer,2));
       })
       .catch(function(e) {
-        console.error('list-suppliers.js - An unexpected error occurred: ', e);
+        console.error(commandName + ' > An unexpected error occurred: ', e);
       });
   }
 });

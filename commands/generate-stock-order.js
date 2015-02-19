@@ -38,15 +38,16 @@ var GenerateStockOrder = Command.extend({
   desc: 'Generate a stock order in Vend, based on sales history',
 
   options: {
-    token: 'string',
-    domain: 'string',
     orderName: 'string',
     outletId: 'string',
     supplierId: 'string',
     interval: 'string'
   },
 
-  run: function (token, domain, orderName, outletId, supplierId, interval) {
+  run: function (orderName, outletId, supplierId, interval) {
+    var token = this.global.token || this.global.t;
+    var domain = this.global.domain || this.global.d;
+
     var connectionInfo = utils.loadOauthTokens(token, domain);
     if (!orderName) {
       throw new Error('--orderName should be set');

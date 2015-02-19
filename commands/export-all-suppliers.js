@@ -9,12 +9,12 @@ var ExportAllSuppliers = Command.extend({
   desc: 'Export All Suppliers (CSV file format by default)',
 
   options: {
-    token: 'string',
-    domain: 'string'
   },
 
-  run: function (token, domain) {
+  run: function () {
     var commandName = path.basename(__filename, '.js');
+    var token = this.global.token || this.global.t;
+    var domain = this.global.domain || this.global.d;
 
     var connectionInfo = utils.loadOauthTokens(token, domain);
 

@@ -10,13 +10,13 @@ var FetchProductById = Command.extend({
   desc: 'Fetches a product by id',
 
   options: {
-    token: 'string',
-    domain: 'string',
     id: 'string'
   },
 
-  run: function (token, domain, id) {
+  run: function (id) {
     var commandName = path.basename(__filename, '.js');
+    var token = this.global.token || this.global.t;
+    var domain = this.global.domain || this.global.d;
 
     if (!id) {
       throw new Error('--id should be set');
