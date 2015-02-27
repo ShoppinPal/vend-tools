@@ -27,8 +27,8 @@ var ListProducts = Command.extend({
     args.active.value = true;
 
     return vendSdk.products.fetch(args, connectionInfo)
-      .then(function(response) {
-        return utils.updateOauthTokens(connectionInfo,response);
+      .tap(function(response) {
+        return utils.updateOauthTokens(connectionInfo);
       })
       .then(function(response) {
         console.log(commandName + ' > response.products.length: ', response.products.length);

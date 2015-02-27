@@ -24,9 +24,9 @@ var FetchProductByHandle = Command.extend({
     var connectionInfo = utils.loadOauthTokens(token, domain);
 
     return vendSdk.products.fetchByHandle({handle:{value:handle}}, connectionInfo)
-      .then(function(response) {
+      .tap(function(response) {
         console.log(commandName + ' > 1st then block');
-        return utils.updateOauthTokens(connectionInfo,response);
+        return utils.updateOauthTokens(connectionInfo);
       })
       .then(function(response) {
         console.log(commandName + ' > 2nd then block');

@@ -28,9 +28,9 @@ var FetchProductById = Command.extend({
     args.apiId.value = id;
 
     return vendSdk.products.fetchById(args, connectionInfo)
-      .then(function(response) {
+      .tap(function(response) {
         console.log(commandName + ' > 1st then block');
-        return utils.updateOauthTokens(connectionInfo,response);
+        return utils.updateOauthTokens(connectionInfo);
       })
       .then(function(response) {
         console.log(commandName + ' > 2nd then block');

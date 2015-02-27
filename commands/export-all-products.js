@@ -22,9 +22,9 @@ var ExportAllProducts = Command.extend({
     var connectionInfo = utils.loadOauthTokens(token, domain);
 
     return vendSdk.products.fetchAll(connectionInfo)
-      .then(function(products) {
+      .tap(function(products) {
         console.log(commandName + ' > 1st then block');
-        return utils.updateOauthTokens(connectionInfo,products);
+        return utils.updateOauthTokens(connectionInfo);
       })
       .then(function(products) {
         console.log(commandName + ' > 2nd then block');

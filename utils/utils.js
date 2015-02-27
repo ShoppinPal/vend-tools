@@ -6,7 +6,7 @@ var _ = require('underscore');
 var path = require('path');
 var vendSdk = require('vend-nodejs-sdk')({});
 
-var updateOauthTokens = function(connectionInfo, response){
+var updateOauthTokens = function(connectionInfo){
   console.log('updating oauth.json ... in case there might have been token changes');
   //console.log('connectionInfo: ' + JSON.stringify(connectionInfo,null,2));
   var oauthFile = path.join(__dirname, '..', 'oauth.json');
@@ -18,10 +18,7 @@ var updateOauthTokens = function(connectionInfo, response){
       'token_type': 'Bearer',
       'refresh_token': connectionInfo.refreshToken,
       'domain_prefix': connectionInfo.domainPrefix
-    },null,2))
-    .then(function() {
-      return Promise.resolve(response); // just passing it through to the next block
-    });
+    },null,2));
 };
 
 // TODO: add a CLI spinner to indicate file is being saved? Because sometimes the pauses may appear long?

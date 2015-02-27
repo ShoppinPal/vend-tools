@@ -25,8 +25,8 @@ var ListSuppliers = Command.extend({
       pageSize:{value: 200}
     };
     return vendSdk.suppliers.fetch(args, connectionInfo)
-      .then(function(response) {
-        return utils.updateOauthTokens(connectionInfo,response);
+      .tap(function(response) {
+        return utils.updateOauthTokens(connectionInfo);
       })
       .then(function(response) {
         console.log(commandName + ' > response.suppliers.length: ', response.suppliers.length);

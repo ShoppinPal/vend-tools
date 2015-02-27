@@ -168,9 +168,9 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
     .then(function(data) {
       console.log(data);
     })
-    /*.then(function(products) {
+    /*.tap(function(products) {
       console.log(commandName + ' > 1st then block');
-      return utils.updateOauthTokens(connectionInfo,products);
+      return utils.updateOauthTokens(connectionInfo);
     })
     .then(function(products) {
       console.log(commandName + ' > 2nd then block');

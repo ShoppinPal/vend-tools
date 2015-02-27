@@ -19,19 +19,16 @@ var ExportAllSuppliers = Command.extend({
     var connectionInfo = utils.loadOauthTokens(token, domain);
 
     return vendSdk.suppliers.fetchAll(connectionInfo)
-      .then(function(suppliers) {
+      .tap(function(suppliers) {
         console.log(commandName + ' > 1st then block');
-        return utils.updateOauthTokens(connectionInfo,suppliers);
+        return utils.updateOauthTokens(connectionInfo);
       })
-      .then(function(suppliers) {
+      .tap(function(suppliers) {
         console.log(commandName + ' > suppliers.length: ', suppliers.length);
         //console.log('products: ', JSON.stringify(suppliers,vendSdk.replacer,2));
 
         console.log(commandName + ' > 2nd then block');
-        return utils.exportToJsonFileFormat(commandName, suppliers)
-          .then(function() {
-            return Promise.resolve(suppliers);
-          });
+        return utils.exportToJsonFileFormat(commandName, suppliers);
       })
       .then(function(suppliers) {
         console.log(commandName + ' > 3rd then block');
