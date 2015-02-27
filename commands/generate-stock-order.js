@@ -53,10 +53,11 @@ var GenerateStockOrder = Command.extend({
     if (!orderName) {
       throw new Error('--orderName should be set');
     }
-    if (!supplierId) {
-      throw new Error('--supplierId should be set');
-    }
-    return validateOutlet(outletId, connectionInfo)
+    return validateSupplier(supplierId, connectionInfo)
+      .then(function(resolvedSupplierId){
+        supplierId = resolvedSupplierId;
+        return validateOutlet(outletId, connectionInfo);
+      })
       .then(function(resolvedOutletId){
         outletId = resolvedOutletId;
         return validateInterval(interval);
@@ -110,6 +111,53 @@ var chooseInterval = function(){
     });
 };
 
+var validateSupplier = function(supplierId, connectionInfo) {
+  if (supplierId) {
+    return Promise.resolve(supplierId);
+  }
+  else {
+    // if the supplierId isn't specified, prompt the user with a list of user friendly supplier names to choose from
+    return fetchSuppliers(connectionInfo)
+      .then(function(suppliers){
+        return chooseSupplier(suppliers)
+          .then(function(selectedValue){
+            return Promise.resolve(selectedValue);
+          });
+      });
+  }
+};
+
+var fetchSuppliers = function(connectionInfo){
+  return vendSdk.suppliers.fetchAll(connectionInfo)
+    .then(function(suppliers) {
+      console.log(commandName + ' > suppliers.length: ', suppliers.length);
+      //console.log('products: ', JSON.stringify(suppliers,vendSdk.replacer,2));
+      console.log('supplierDisplayOptions: ' + _.pluck(suppliers,'name'));
+      console.log('supplierOptions: ' + _.pluck(suppliers,'id'));5
+      console.log('====done with suppliers fetch====');
+      return Promise.resolve(suppliers);
+    });
+};
+
+var chooseSupplier = function(suppliers){
+  var supplierOptionsForDisplay = _.pluck(suppliers,'name');
+  var supplierOptions = _.pluck(suppliers,'id');
+
+  return asking.chooseAsync('Which supplier?', supplierOptionsForDisplay)
+    .then(function (resolvedResults) {
+      var userFriendlySelectedValue = resolvedResults[0];
+      var indexOfSelectedValue = resolvedResults[1];
+      var systemOrientedSelectedValue = supplierOptions[indexOfSelectedValue];
+      console.log('selectedValue: ' + systemOrientedSelectedValue);
+      return Promise.resolve(systemOrientedSelectedValue);
+    })
+    .catch(function(e) {
+      //console.error(commandName + ' > An unexpected error occurred: ', e);
+      console.log('Incorrect selection! Please choose an option between 1 - ' + supplierOptions.length);
+      return chooseSupplier(suppliers);
+    });
+};
+
 var validateOutlet = function(outletId, connectionInfo) {
   if (outletId) {
     return Promise.resolve(outletId);
@@ -120,8 +168,7 @@ var validateOutlet = function(outletId, connectionInfo) {
       .then(function(outlets){
         return chooseOutlet(outlets)
           .then(function(selectedValue){
-            outletId = selectedValue;
-            return Promise.resolve(outletId);
+            return Promise.resolve(selectedValue);
           });
       });
   }
