@@ -54,6 +54,10 @@ var GenerateStockOrder = Command.extend({
       throw new Error('--orderName should be set');
     }
     return validateSupplier(supplierId, connectionInfo)
+      .tap(function(resolvedSupplierId) {
+        //console.log(commandName + ' > 1st tap block');
+        return utils.updateOauthTokens(connectionInfo);
+      })
       .then(function(resolvedSupplierId){
         supplierId = resolvedSupplierId;
         return validateOutlet(outletId, connectionInfo);
