@@ -10,7 +10,7 @@ var utils = require('./../utils/utils.js');
 var fileSystem = require('q-io/fs');
 
 var moment = require('moment');
-//var _ = require('underscore');
+var _ = require('underscore');
 var path = require('path');
 
 // Global variable for logging
@@ -34,6 +34,7 @@ var intervalOptionsForDisplay = [
     'Starting two months ago (' + twoMonthsAgo.format('YYYY-MM-DD') + ')'
 ];
 
+// the command's implementation
 var GenerateStockOrder = Command.extend({
   desc: 'Generate a stock order in Vend, based on sales history',
 
@@ -52,20 +53,21 @@ var GenerateStockOrder = Command.extend({
     if (!orderName) {
       throw new Error('--orderName should be set');
     }
-    if (!outletId) {
-      throw new Error('--outletId should be set');
-    }
     if (!supplierId) {
       throw new Error('--supplierId should be set');
     }
-    return validateInterval(interval)
+    return validateOutlet(outletId, connectionInfo)
+      .then(function(resolvedOutletId){
+        outletId = resolvedOutletId;
+        return validateInterval(interval);
+      })
       .then(function(since){
         runMe(connectionInfo, orderName, outletId, supplierId, since);
       });
   }
 });
 
-var validateInterval = function(interval, next) {
+var validateInterval = function(interval) {
   if (interval) {
     var since = null;
     switch(interval) {
@@ -105,6 +107,54 @@ var chooseInterval = function(){
       //console.error(commandName + ' > An unexpected error occurred: ', e);
       console.log('Incorrect selection! Please choose an option between 1 - ' + intervalOptions.length);
       return chooseInterval();
+    });
+};
+
+var validateOutlet = function(outletId, connectionInfo) {
+  if (outletId) {
+    return Promise.resolve(outletId);
+  }
+  else {
+    // if the outletId isn't specified, prompt the user with a list of user friendly outlet names to choose from
+    return fetchOutlets(connectionInfo)
+      .then(function(outlets){
+        return chooseOutlet(outlets)
+          .then(function(selectedValue){
+            outletId = selectedValue;
+            return Promise.resolve(outletId);
+          });
+      });
+  }
+};
+
+var fetchOutlets = function(connectionInfo){
+  return vendSdk.outlets.fetch({}, connectionInfo)
+    .then(function(outletsResponse) {
+      //console.log('outletsResponse: ', outletsResponse);
+      console.log('outletsResponse.outlets.length: ', outletsResponse.outlets.length);
+      //console.log('outletOptions: ' + _.pluck(outletsResponse.outlets,'id'));
+      //console.log('outletOptions: ' + _.pluck(outletsResponse.outlets,'name'));
+      console.log('====done with outlets fetch====');
+      return Promise.resolve(outletsResponse.outlets);
+    });
+};
+
+var chooseOutlet = function(outlets){
+  var outletOptionsForDisplay = _.pluck(outlets,'name');
+  var outletOptions = _.pluck(outlets,'id');
+
+  return asking.chooseAsync('Which outlet?', outletOptionsForDisplay)
+    .then(function (resolvedResults) {
+      var userFriendlySelectedValue = resolvedResults[0];
+      var indexOfSelectedValue = resolvedResults[1];
+      var systemOrientedSelectedValue = outletOptions[indexOfSelectedValue];
+      console.log('selectedValue: ' + systemOrientedSelectedValue);
+      return Promise.resolve(systemOrientedSelectedValue);
+    })
+    .catch(function(e) {
+      //console.error(commandName + ' > An unexpected error occurred: ', e);
+      console.log('Incorrect selection! Please choose an option between 1 - ' + outletOptions.length);
+      return chooseOutlet(outlets);
     });
 };
 
