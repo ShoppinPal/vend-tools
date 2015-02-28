@@ -253,19 +253,20 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
       console.log(commandName + ' > products.length: ' + products.length);
       return utils.exportToJsonFileFormat(commandName, products);
     })
-    /*.then(function(products) {
+    .then(function() {
       console.log(commandName + ' > 3rd then block');
 
-      return vendSdk.outlets.fetch({}, connectionInfo)
-        .then(function(outletsResponse) {
-          //console.log('outletsResponse: ', outletsResponse);
-          console.log(commandName + ' > outletsResponse.outlets.length: ', outletsResponse.outlets.length);
-          //console.log('outletsResponse.outlets: ' + JSON.stringify(outletsResponse.outlets,vendSdk.replacer,2));
+      var sinceAsString = since.format('YYYY-MM-DD HH:MM:SS');
 
-          utils.exportProductsToCsvFileFormat(products, outletsResponse.outlets); // TODO: promisify somehow and then return the promise
-          //return Promise.resolve(); // there is no way that this line actually works
+      var argsForSales = vendSdk.args.sales.fetch();
+      argsForSales.since.value = sinceAsString;
+      argsForSales.outletApiId.value = outletId;
+
+      return vendSdk.sales.fetchAll(argsForSales,connectionInfo)
+        .then(function(sales) {
+          console.log('sales.length: ' + sales.length);
         });
-    })*/
+    })
     .catch(function(e) {
       console.error(commandName + ' > An unexpected error occurred: ', e);
     });
