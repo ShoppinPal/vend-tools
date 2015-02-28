@@ -35,6 +35,7 @@ var intervalOptionsForDisplay = [
 ];
 
 var selectedSupplierName = null;
+var stockOrder = null;
 
 // the command's implementation
 var GenerateStockOrder = Command.extend({
@@ -225,8 +226,12 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
   args.supplierId.value = supplierId;
 
   return vendSdk.consignments.stockOrders.create(args, connectionInfo)
-    .then(function(data) {
-      console.log(data);
+    .then(function(newStockOrder) {
+      console.log(commandName + ' > 1st then block');
+
+      stockOrder = newStockOrder;
+      console.log('stockOrder: ', stockOrder);
+
       return vendSdk.products.fetchAll(connectionInfo);
     })
     /*.tap(function(products) {
@@ -243,16 +248,13 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
                  _.contains(_.pluck(product.inventory,'outlet_id'), outletId) &&
                  selectedSupplierName === product.supplier_name
                );
-        });
+      }); // TODO: we only want count and supply_price, should we dilute even further?
+
       console.log(commandName + ' > products.length: ' + products.length);
       return utils.exportToJsonFileFormat(commandName, products);
     })
     /*.then(function(products) {
       console.log(commandName + ' > 3rd then block');
-      //console.log(products);
-
-      console.log(commandName + ' > products.length: ', products.length);
-      //console.log('products: ', JSON.stringify(products,vendSdk.replacer,2));
 
       return vendSdk.outlets.fetch({}, connectionInfo)
         .then(function(outletsResponse) {
