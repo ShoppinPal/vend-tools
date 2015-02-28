@@ -34,6 +34,8 @@ var intervalOptionsForDisplay = [
     'Starting two months ago (' + twoMonthsAgo.format('YYYY-MM-DD') + ')'
 ];
 
+var selectedSupplierName = null;
+
 // the command's implementation
 var GenerateStockOrder = Command.extend({
   desc: 'Generate a stock order in Vend, based on sales history',
@@ -117,7 +119,13 @@ var chooseInterval = function(){
 
 var validateSupplier = function(supplierId, connectionInfo) {
   if (supplierId) {
+    // we still need to get a supplier name for the given supplierId
+    return vendSdk.suppliers.fetchById({apiId:{value:supplierId}},connectionInfo)
+      .then(function(supplier){
+        console.log(supplier);
+        selectedSupplierName = supplier.name;
     return Promise.resolve(supplierId);
+      });
   }
   else {
     // if the supplierId isn't specified, prompt the user with a list of user friendly supplier names to choose from
@@ -153,6 +161,7 @@ var chooseSupplier = function(suppliers){
       var indexOfSelectedValue = resolvedResults[1];
       var systemOrientedSelectedValue = supplierOptions[indexOfSelectedValue];
       console.log('selectedValue: ' + systemOrientedSelectedValue);
+      selectedSupplierName = userFriendlySelectedValue;
       return Promise.resolve(systemOrientedSelectedValue);
     })
     .catch(function(e) {
@@ -218,19 +227,27 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
   return vendSdk.consignments.stockOrders.create(args, connectionInfo)
     .then(function(data) {
       console.log(data);
+      return vendSdk.products.fetchAll(connectionInfo);
     })
     /*.tap(function(products) {
       console.log(commandName + ' > 1st then block');
       return utils.updateOauthTokens(connectionInfo);
-    })
-    .then(function(products) {
+    })*/
+    .tap(function(products) {
       console.log(commandName + ' > 2nd then block');
-      return utils.exportToJsonFileFormat('export-all-products', products)
-        .then(function() {
-          return Promise.resolve(products);
+      // keep only the products that have an inventory field
+      // and belong to the store/outlet of interest to us
+      // and belong to the supplier of interest to us
+      products = _.filter(products, function(product){
+        return ( product.inventory &&
+                 _.contains(_.pluck(product.inventory,'outlet_id'), outletId) &&
+                 selectedSupplierName === product.supplier_name
+               );
         });
+      console.log(commandName + ' > products.length: ' + products.length);
+      return utils.exportToJsonFileFormat(commandName, products);
     })
-    .then(function(products) {
+    /*.then(function(products) {
       console.log(commandName + ' > 3rd then block');
       //console.log(products);
 
