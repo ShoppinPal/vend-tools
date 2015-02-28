@@ -143,9 +143,9 @@ var fetchSuppliers = function(connectionInfo){
   return vendSdk.suppliers.fetchAll(connectionInfo)
     .then(function(suppliers) {
       console.log(commandName + ' > suppliers.length: ', suppliers.length);
-      //console.log('products: ', JSON.stringify(suppliers,vendSdk.replacer,2));
-      console.log('supplierDisplayOptions: ' + _.pluck(suppliers,'name'));
-      console.log('supplierOptions: ' + _.pluck(suppliers,'id'));5
+      //console.log('suppliers: ', JSON.stringify(suppliers,vendSdk.replacer,2));
+      //console.log('supplierDisplayOptions: ' + _.pluck(suppliers,'name'));
+      //console.log('supplierOptions: ' + _.pluck(suppliers,'id'));5
       console.log('====done with suppliers fetch====');
       return Promise.resolve(suppliers);
     });
