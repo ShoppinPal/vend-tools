@@ -123,7 +123,7 @@ var validateSupplier = function(supplierId, connectionInfo) {
     // we still need to get a supplier name for the given supplierId
     return vendSdk.suppliers.fetchById({apiId:{value:supplierId}},connectionInfo)
       .then(function(supplier){
-        console.log(supplier);
+        //console.log(supplier);
         selectedSupplierName = supplier.name;
     return Promise.resolve(supplierId);
       });
@@ -220,26 +220,13 @@ var chooseOutlet = function(outlets){
 };
 
 var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
-  var args = vendSdk.args.consignments.stockOrders.create();
-  args.name.value = orderName;
-  args.outletId.value = outletId;
-  args.supplierId.value = supplierId;
+  //return vendSdk.products.fetchAll(connectionInfo)
+  var products = require(utils.getAbsoluteFilename(commandName));
+  return Promise.resolve(products)
+    .then(function(products) {
+      console.log(commandName + ' > 1st tap block');
+      console.log(commandName + ' > original products.length: ' + products.length);
 
-  return vendSdk.consignments.stockOrders.create(args, connectionInfo)
-    .then(function(newStockOrder) {
-      console.log(commandName + ' > 1st then block');
-
-      stockOrder = newStockOrder;
-      console.log('stockOrder: ', stockOrder);
-
-      return vendSdk.products.fetchAll(connectionInfo);
-    })
-    /*.tap(function(products) {
-      console.log(commandName + ' > 1st then block');
-      return utils.updateOauthTokens(connectionInfo);
-    })*/
-    .tap(function(products) {
-      console.log(commandName + ' > 2nd then block');
       // keep only the products that have an inventory field
       // and belong to the store/outlet of interest to us
       // and belong to the supplier of interest to us
@@ -248,15 +235,30 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
                  _.contains(_.pluck(product.inventory,'outlet_id'), outletId) &&
                  selectedSupplierName === product.supplier_name
                );
-      }); // TODO: we only want count and supply_price, should we dilute even further?
+      });
+      console.log(commandName + ' > filtered products.length: ' + products.length);
 
-      console.log(commandName + ' > products.length: ' + products.length);
-      return utils.exportToJsonFileFormat(commandName, products);
-    })
+      // let's dilute the product data even further
+      products = _.object(_.map(products, function(product) {
+        var neoProduct =  _.pick(product,'name','supply_price');
+        neoProduct.inventory = _.find(product.inventory, function(inv){
+          return inv.outlet_id === outletId;
+        });
+        return [product.id, neoProduct];
+      }));
+      console.log(commandName + ' > diluted products.length: ' + _.keys(products).length);
+
+      return utils.exportToJsonFileFormat(commandName+'-products', products)
     .then(function() {
-      console.log(commandName + ' > 3rd then block');
+          return Promise.resolve(products);
+        });
+    })
+    .then(function(products) {
+      console.log(commandName + ' > 2nd then block');
 
       var sinceAsString = since.format('YYYY-MM-DD HH:MM:SS');
+      /*console.log('since.format(): ' + since.format()); // by default moment formats it as ISO 8601 which is what Vend wants
+      console.log('since.format(\'YYYY-MM-DD HH:MM:SS\'): ' + since.format('YYYY-MM-DD HH:MM:SS'));*/
 
       var argsForSales = vendSdk.args.sales.fetch();
       argsForSales.since.value = sinceAsString;
@@ -265,7 +267,134 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
       return vendSdk.sales.fetchAll(argsForSales,connectionInfo)
         .then(function(sales) {
           console.log('sales.length: ' + sales.length);
+
+          return utils.exportToJsonFileFormat(commandName+'-sales', sales)
+            .then(function() {
+              var lineitems = _.flatten(_.pluck(sales,'register_sale_products'));
+              console.log('lineitems.length: ' + lineitems.length);
+
+              return utils.exportToJsonFileFormat(commandName+'-lineitems', lineitems)
+                .then(function() {
+                  // tally up a map (productId to count) for the total amount sold
+                  // based on sale lineitems and lineitem.quantity etc.
+                  var productSales = {};
+                  _.each(lineitems, function(lineitem){
+                    if (productSales[lineitem.product_id]) {
+                      //productSales[lineitem.product_id] += lineitem.quantity;
+                      productSales[lineitem.product_id].quantity += lineitem.quantity;
+                    }
+                    else {
+                      //productSales[lineitem.product_id] = lineitem.quantity;
+                      productSales[lineitem.product_id] = _.pick(lineitem, 'name', 'quantity');
+                    }
         });
+                  console.log('productSales.length: ' + _.keys(productSales).length);
+                  return utils.exportToJsonFileFormat(commandName+'-productSales', productSales)
+                    .then(function() {
+                      // TODO: iterate over products and generate ConsignmentProducts
+                      //       ... do the math based on stock-on-hand (product.inventory.count)
+                      //       and stock-sold (productSales.quantity)
+
+                      // (1) reorder quantity is 0, do nothing
+                      var discontinuedProducts = {};
+
+                      // (2) No sales history and 30 are still in stock, in a separate stockOrder,
+                      //     place order for restock_level if 30 <= reorder_point
+                      var productsToOrderBasedOnVendMechanics = {};
+
+                      // (3) 5 sold and 30 still in stock, 5-30=-25, no need to order anymore
+                      var productsWithSufficientStockOnHand = {};
+
+                      // (4) 30 sold and -5 still in stock, ignore negative inventory, so order 30 more units for the next interval
+                      var negativeStockProductsToOrder = {};
+                      // (5) 30 sold and 0 still in stock, 30-0=30, order 30 more units for the next interval
+                      var zeroStockProductsToOrder = {};
+                      // (6) 30 sold and 5 still in stock, 30-5=25, so order 25 more units for the next interval
+                      var positiveStockProductsToOrder = {};
+
+                      _.each(products, function(product, productId){
+                        if (product.inventory.restock_level==0 /*&& product.inventory.restock_level==0*/) {
+                          discontinuedProducts[productId] = product;
+                        }
+                        else {
+                          var productSalesHistory = productSales[productId];
+                          if (productSalesHistory){
+                            if (product.inventory.count < 0) {
+                              negativeStockProductsToOrder[productId] = product;
+                            }
+                            else {
+                              var difference = productSalesHistory.quantity - product.inventory.count;
+                              if (difference == 0) {
+                                zeroStockProductsToOrder[productId] = product;
+                              }
+                              else if (difference > 0){
+                                positiveStockProductsToOrder[productId] = product;
+                              }
+                              else {
+                                productsWithSufficientStockOnHand[productId] = product;
+                              }
+                            }
+                          }
+                          else {
+                            productsToOrderBasedOnVendMechanics[productId] = product;
+                          }
+                        }
+                      });
+
+                      // (4), (5), & (6)
+                      var productsToOrderBasedOnSalesData = {};
+                      _.extend(productsToOrderBasedOnSalesData,
+                        negativeStockProductsToOrder, zeroStockProductsToOrder, positiveStockProductsToOrder);
+
+                      // print the length and then push each array out to a JSON file of its own
+                      console.log('discontinuedProducts.length', _.keys(discontinuedProducts).length);
+                      console.log('productsWithSufficientStockOnHand.length', _.keys(productsWithSufficientStockOnHand).length);
+                      console.log('productsToOrderBasedOnVendMechanics.length', _.keys(productsToOrderBasedOnVendMechanics).length);
+                      console.log('negativeStockProductsToOrder.length', _.keys(negativeStockProductsToOrder).length);
+                      console.log('zeroStockProductsToOrder.length', _.keys(zeroStockProductsToOrder).length);
+                      console.log('positiveStockProductsToOrder.length', _.keys(positiveStockProductsToOrder).length);
+                      console.log('productsToOrderBasedOnSalesData.length', _.keys(productsToOrderBasedOnSalesData).length);
+                      return utils.exportToJsonFileFormat(commandName+'-x1Disc', discontinuedProducts)
+                        .then(function(){
+                          return utils.exportToJsonFileFormat(commandName+'-x2Suff', productsWithSufficientStockOnHand)
+                        })
+                        .then(function(){
+                          return utils.exportToJsonFileFormat(commandName+'-x3Vend', productsToOrderBasedOnVendMechanics)
+                        })
+                        .then(function(){
+                          return utils.exportToJsonFileFormat(commandName+'-x4Sales', productsToOrderBasedOnSalesData)
+                        })
+                        .then(function(){
+                          Promise.resolve([productsToOrderBasedOnVendMechanics,
+                            productsToOrderBasedOnSalesData,
+                            productSales]);
+                        });
+                    });
+                });
+            });
+        });
+    })
+    .spread(function(productsToOrderBasedOnVendMechanics, productsToOrderBasedOnSalesData, productSales) {
+      console.log('productsToOrderBasedOnVendMechanics.length', _.keys(productsToOrderBasedOnVendMechanics).length);
+      console.log('productsToOrderBasedOnSalesData.length', _.keys(productsToOrderBasedOnSalesData).length);
+      console.log('productSales.length: ' + _.keys(productSales).length);
+
+      // TODO: prepare 2 separate sets of consignmentProducts which will be submitted to Vend
+
+      /*console.log(commandName + ' > YYY then block');
+
+      var args = vendSdk.args.consignments.stockOrders.create();
+      args.name.value = orderName;
+      args.outletId.value = outletId;
+      args.supplierId.value = supplierId;
+
+      return vendSdk.consignments.stockOrders.create(args, connectionInfo)
+        .then(function(newStockOrder) {
+          console.log(commandName + ' > ZZZ then block');
+
+          stockOrder = newStockOrder;
+          console.log('stockOrder: ', stockOrder);
+        });*/
     })
     .catch(function(e) {
       console.error(commandName + ' > An unexpected error occurred: ', e);
