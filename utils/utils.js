@@ -312,6 +312,8 @@ var exportProductsToCsvFileFormat = function(products, outlets){
   // TODO: return a Promise
 };
 
+exports.getAbsoluteFilename = getAbsoluteFilename;
+
 exports.updateOauthTokens = updateOauthTokens;
 exports.loadOauthTokens = loadOauthTokens;
 exports.exportToJsonFileFormat = exportToJsonFileFormat;
