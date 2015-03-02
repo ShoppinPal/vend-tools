@@ -365,7 +365,7 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
                           return utils.exportToJsonFileFormat(commandName+'-x4Sales', productsToOrderBasedOnSalesData)
                         })
                         .then(function(){
-                          Promise.resolve([productsToOrderBasedOnVendMechanics,
+                          return Promise.resolve([productsToOrderBasedOnVendMechanics,
                             productsToOrderBasedOnSalesData,
                             productSales]);
                         });
