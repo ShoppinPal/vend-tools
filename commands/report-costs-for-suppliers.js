@@ -16,8 +16,8 @@ var ReportCostsForSuppliers = Command.extend({
   },
 
   run: function () {
-    var token = this.global.token || this.global.t;
-    var domain = this.global.domain || this.global.d;
+    var token = this.global.token;
+    var domain = this.global.domain;
 
     var connectionInfo = utils.loadOauthTokens(token, domain);
 

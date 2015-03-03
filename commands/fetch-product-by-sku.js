@@ -15,8 +15,8 @@ var FetchProductBySku = Command.extend({
 
   run: function (sku) {
     var commandName = path.basename(__filename, '.js');
-    var token = this.global.token || this.global.t;
-    var domain = this.global.domain || this.global.d;
+    var token = this.global.token;
+    var domain = this.global.domain;
 
     if (!sku) {
       throw new Error('--sku should be set');

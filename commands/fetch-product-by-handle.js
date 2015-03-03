@@ -15,8 +15,8 @@ var FetchProductByHandle = Command.extend({
 
   run: function (handle) {
     var commandName = path.basename(__filename, '.js');
-    var token = this.global.token || this.global.t;
-    var domain = this.global.domain || this.global.d;
+    var token = this.global.token;
+    var domain = this.global.domain;
 
     if (!handle) {
       throw new Error('--handle should be set');

@@ -14,7 +14,7 @@ var program = ronin({
     },
     output: {
       type: 'string',
-      aliases: ['o']
+      aliases: ['f']
     }
   }
 });

@@ -14,7 +14,7 @@ var _ = require('underscore');
 var path = require('path');
 
 // Global variable for logging
-var commandName = path.basename(__filename, '.js');
+var commandName = path.basename(__filename, '.js'); // gives the filename without the .js extension
 
 // Global variables for interval
 var aWeekAgo = moment.utc().subtract(1, 'weeks');
@@ -41,20 +41,32 @@ var stockOrder = null;
 var GenerateStockOrder = Command.extend({
   desc: 'Generate a stock order in Vend, based on sales history',
 
-  options: {
-    orderName: 'string',
-    outletId: 'string',
-    supplierId: 'string',
-    interval: 'string'
+  options: { // must not clash with global aliases: -t -d -f
+    orderName: {
+      type: 'string',
+      aliases: ['n']
+    },
+    outletId: {
+      type: 'string',
+      aliases: ['o'] // TODO: once Ronin is fixed to accept 2 characters as an alias, use 'oi' alias
+    },
+    supplierId: {
+      type: 'string',
+      aliases: ['s'] // TODO: once Ronin is fixed to accept 2 characters as an alias, use 'si' alias
+    },
+    interval: {
+      type: 'string',
+      aliases: ['i']
+    }
   },
 
   run: function (orderName, outletId, supplierId, interval) {
-    var token = this.global.token || this.global.t;
-    var domain = this.global.domain || this.global.d;
+    var token = this.global.token;
+    var domain = this.global.domain;
 
     var connectionInfo = utils.loadOauthTokens(token, domain);
     if (!orderName) {
-      throw new Error('--orderName should be set');
+      throw new Error('--orderName or -n should be set');
     }
     return validateSupplier(supplierId, connectionInfo)
       .tap(function(resolvedSupplierId) {
