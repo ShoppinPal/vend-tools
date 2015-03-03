@@ -21,7 +21,7 @@
     "moment": "2.9.0",
     "nconf": "0.7.1",
     "q-io": "1.11.6",
-    "ronin": "0.3.8",
+    "ronin": "0.3.9",
     "underscore": "1.7.0",
     "vend-nodejs-sdk": "git://github.com/shoppinpal/vend-nodejs-sdk"
   },
