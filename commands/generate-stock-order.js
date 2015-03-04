@@ -65,6 +65,8 @@ var GenerateStockOrder = Command.extend({
     var domain = this.global.domain;
 
     var connectionInfo = utils.loadOauthTokens(token, domain);
+    commandName = commandName + '-'+ connectionInfo.domainPrefix;
+
     if (!orderName) {
       throw new Error('--orderName or -n should be set');
     }
@@ -82,6 +84,11 @@ var GenerateStockOrder = Command.extend({
         return validateInterval(interval);
       })
       .then(function(since){
+        console.log('vend-tools ' + commandName +
+          ' -n ' + orderName +
+          ' -o ' + outletId +
+          ' -s ' + supplierId +
+          ' -i ' + interval);
         runMe(connectionInfo, orderName, outletId, supplierId, since);
       });
   }
@@ -310,11 +317,11 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
                   console.log('productSales.length: ' + _.keys(productSales).length);
                   return utils.exportToJsonFileFormat(commandName+'-productSales', productSales)
                     .then(function() {
-                      // TODO: iterate over products and generate ConsignmentProducts
+                      // iterate over products and generate ConsignmentProducts
                       //       ... do the math based on stock-on-hand (product.inventory.count)
                       //       and stock-sold (productSales.quantity)
 
-                      // (1) reorder quantity is 0, do nothing
+                      // (1) reorder quantity (restock_level?) is 0, do nothing
                       var discontinuedProducts = {};
 
                       // (2) No sales history and 30 are still in stock, in a separate stockOrder,
@@ -334,7 +341,7 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
                       var positiveStockProductsToOrder = {};
 
                       _.each(dilutedProducts, function(product, productId){
-                        if (product.inventory.restock_level==0 /*&& product.inventory.restock_level==0*/) {
+                        if (product.inventory.restock_level==0 /*&& product.inventory.reorder_point==0*/) {
                           discontinuedProducts[productId] = product;
                         }
                         else {
@@ -397,27 +404,35 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
                           return utils.exportToJsonFileFormat(commandName+'-x4Sales', productsToOrderBasedOnSalesData)
                         })
                         .then(function(){
-                          return Promise.resolve([productsToOrderBasedOnVendMechanics,
+                          return Promise.resolve([
+                            productsWithSufficientStockOnHand,
+                            productsToOrderBasedOnVendMechanics,
                             productsToOrderBasedOnSalesData,
-                            productSales]);
+                            productSales
+                          ]);
                         });
                     });
                 });
             });
         });
     })
-    .spread(function(productsToOrderBasedOnVendMechanics, productsToOrderBasedOnSalesData, productSales) {
+    .spread(function(productsWithSufficientStockOnHand, productsToOrderBasedOnVendMechanics, productsToOrderBasedOnSalesData, productSales) {
       //console.log(commandName + ' > YYY then block');
+      console.log('productsWithSufficientStockOnHand.length', _.keys(productsWithSufficientStockOnHand).length);
       console.log('productsToOrderBasedOnVendMechanics.length', _.keys(productsToOrderBasedOnVendMechanics).length);
       console.log('productsToOrderBasedOnSalesData.length', _.keys(productsToOrderBasedOnSalesData).length);
       console.log('productSales.length: ' + _.keys(productSales).length);
 
-      // TODO: prepare ALL sets of consignmentProducts which will be submitted to Vend
-      //productsWithSufficientStockOnHand - pending
-      //productsToOrderBasedOnVendMechanics - pending
-      //productsToOrderBasedOnSalesData - DONE
+
+      //TODO: what should be done about productsToOrderBasedOnVendMechanics?
+      //      should they be populated? does anyone want this feature?
+      //      maybe as a separate stock order?
+
+      // prepare ALL sets of consignmentProducts which will be submitted to Vend
+      var orderProducts = _.extend({},productsWithSufficientStockOnHand, productsToOrderBasedOnSalesData);
+
       var consignmentProductsArray = [];
-      _.each(productsToOrderBasedOnSalesData,function(product, productId){
+      _.each(orderProducts,function(product, productId){
         consignmentProductsArray.push({
           'sequence_number': consignmentProductsArray.length+1,
           'product_id': productId,
@@ -444,7 +459,7 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
                 _.extend(consignmentProduct, {'consignment_id':newStockOrder.id});
               });
 
-              // TODO: submit the each entry from consignmentProductsArray to Vend
+              // submit the each entry from consignmentProductsArray to Vend
               return Promise.map(
                 consignmentProductsArray,
                 function(consignmentProduct){
