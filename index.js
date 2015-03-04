@@ -19,4 +19,6 @@ var program = ronin({
   }
 });
 
-program.run();
+program.autoupdate(function () {
+  program.run();
+});
