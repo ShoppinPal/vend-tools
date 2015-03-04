@@ -6,6 +6,7 @@ var fileSystem = require('q-io/fs');
 //var Promise = require('bluebird');
 var moment = require('moment');
 //var _ = require('underscore');
+var path = require('path');
 
 var ListSuppliers = Command.extend({
   desc: 'List Suppliers (200 at a time)',
