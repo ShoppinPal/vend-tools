@@ -33,8 +33,10 @@ var DeleteStockOrders = Command.extend({
         if (stockOrders && stockOrders.length>0) {
           return chooseStockOrder(stockOrders)
             .then(function(selectedValue){
-              //return Promise.resolve(selectedValue);
-              console.log('DELETE ' + selectedValue); // TODO: implement it
+              // TODO: do we need to delete any attached products beforehand? or warn the user or something?
+              // TODO: is there some way to query for stockOrders that don't have any products attached to them?
+              //       or just get a count of what's attached?
+              return vendSdk.consignments.stockOrders.remove({apiId:{value:selectedValue}}, connectionInfo);
             });
         }
         else {
@@ -70,7 +72,7 @@ var fetchStockOrders = function(status, connectionInfo){
 
 var chooseStockOrder = function(stockOrders){
   var optionsForDisplay = [];
-  var options = []
+  var options = [];
   _.each(stockOrders, function(stockOrder){
     //_.pluck(stockOrders,'name');
     optionsForDisplay.push(stockOrder.status + ' - ' + stockOrder.name  + ' - ' + stockOrder.consignment_date);
