@@ -322,6 +322,8 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
                       //       and stock-sold (productSales.quantity)
 
                       // (1) reorder quantity (restock_level?) is 0, do nothing
+                      //     reorder_point is the level stock must get to before Vend identifies it as 'low stock'
+                      //     restock_level is the amount of stock to automatically reorder
                       var discontinuedProducts = {};
 
                       // (2) No sales history and 30 are still in stock, in a separate stockOrder,
@@ -423,7 +425,6 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
       console.log('productsToOrderBasedOnSalesData.length', _.keys(productsToOrderBasedOnSalesData).length);
       console.log('productSales.length: ' + _.keys(productSales).length);
 
-
       //TODO: what should be done about productsToOrderBasedOnVendMechanics?
       //      should they be populated? does anyone want this feature?
       //      maybe as a separate stock order?
@@ -432,9 +433,28 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
       var orderProducts = _.extend({},productsWithSufficientStockOnHand, productsToOrderBasedOnSalesData);
 
       var consignmentProductsArray = [];
-      _.each(orderProducts,function(product, productId){
+      _.each(productsToOrderBasedOnSalesData,function(product, productId){
         consignmentProductsArray.push({
-          'sequence_number': consignmentProductsArray.length+1,
+          //'sequence_number': 'Smart',
+          'sequence_number': '1', // lets make this code for productsToOrderBasedOnSalesData
+          'product_id': productId,
+          'count': product.orderMore,
+          'cost': product.supply_price
+        });
+      });
+      _.each(productsToOrderBasedOnVendMechanics,function(product, productId){
+        consignmentProductsArray.push({
+          //'sequence_number': 'Vend',
+          'sequence_number': '2', // lets make this code for productsToOrderBasedOnVendMechanics
+          'product_id': productId,
+          'count': product.inventory.restock_level,
+          'cost': product.supply_price
+        });
+      });
+      _.each(productsWithSufficientStockOnHand,function(product, productId){
+        consignmentProductsArray.push({
+          //'sequence_number': 'Manual',
+          'sequence_number': '3', // lets make this code for productsWithSufficientStockOnHand
           'product_id': productId,
           'count': product.orderMore,
           'cost': product.supply_price
