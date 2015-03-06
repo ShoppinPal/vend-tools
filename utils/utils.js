@@ -138,14 +138,14 @@ var toBuffer = function (ab) {
   return buffer;
 };
 
-var getAbsoluteFilename = function(commandName){
+var getAbsoluteFilename = function(commandName, extension){
   var nconf = require('nconf');
   nconf.file('settings', { file: path.join(__dirname, '..', 'settings.json') });
 
   var defaultOutputDirectory = nconf.get('defaultOutputDirectory');
   var timestampFiles = nconf.get('timestampFiles');
 
-  var filename = setFilename(commandName, timestampFiles);
+  var filename = setFilename(commandName, timestampFiles, extension);
 
   if (defaultOutputDirectory && defaultOutputDirectory.trim().length > 0) {
     if (!fs.existsSync(defaultOutputDirectory)){
@@ -153,19 +153,20 @@ var getAbsoluteFilename = function(commandName){
     }
     var stats = fs.statSync(defaultOutputDirectory);
     if (stats.isDirectory()) {
-      filename = path.join(defaultOutputDirectory, setFilename(commandName, timestampFiles));
+      filename = path.join(defaultOutputDirectory, setFilename(commandName, timestampFiles, extension));
     }
   }
 
   return filename;
 };
 
-var setFilename = function(commandName, timestampFiles){
+var setFilename = function(commandName, timestampFiles, extension){
+  var extension = extension || '.json';
   if (timestampFiles) {
-    return commandName + '-' + moment.utc().format('YYYY-MMM-DD_HH-mm-ss') + '.json';
+    return commandName + '-' + moment.utc().format('YYYY-MMM-DD_HH-mm-ss') + extension;
   }
   else {
-    return commandName + '.json';
+    return commandName + extension;
   }
 };
 
@@ -209,7 +210,8 @@ var exportToCsvFileFormat = function(commandName, data){
         return flatten(entry);
       });
 
-    var filename = commandName + '-' + moment.utc().format('YYYY-MMM-DD_HH-mm-ss') + '.csv';
+    var filename = getAbsoluteFilename(commandName, '.csv');
+
     console.log('saving to ' + filename);
     var writableStream = fs.createWriteStream(filename);
     writableStream.on('open', function(fd){
@@ -289,7 +291,8 @@ var exportProductsToCsvFileFormat = function(products, outlets){
       return neoProduct;
     });
 
-  var filename = 'listProducts-' + moment.utc().format('YYYY-MMM-DD_HH-mm-ss') + '.csv';
+  var filename = getAbsoluteFilename(commandName, '.csv');
+
   console.log('saving to ' + filename);
   var writableStream = fs.createWriteStream(filename);
   writableStream.on('open', function(fd){
