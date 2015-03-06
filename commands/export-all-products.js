@@ -46,7 +46,7 @@ var ExportAllProducts = Command.extend({
             console.log(commandName + ' > outletsResponse.outlets.length: ', outletsResponse.outlets.length);
             //console.log('outletsResponse.outlets: ' + JSON.stringify(outletsResponse.outlets,vendSdk.replacer,2));
 
-            utils.exportProductsToCsvFileFormat(products, outletsResponse.outlets); // TODO: promisify somehow and then return the promise
+            utils.exportProductsToCsvFileFormat(commandName, products, outletsResponse.outlets); // TODO: promisify somehow and then return the promise
             //return Promise.resolve(); // there is no way that this line actually works
           });
       })

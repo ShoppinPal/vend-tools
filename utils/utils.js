@@ -238,7 +238,7 @@ var exportToCsvFileFormat = function(commandName, data){
   }
 };
 
-var exportProductsToCsvFileFormat = function(products, outlets){
+var exportProductsToCsvFileFormat = function(commandName, products, outlets){
   var csv = require('fast-csv');
   var fs = require('fs');
 
