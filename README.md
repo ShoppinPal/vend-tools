@@ -53,20 +53,21 @@ How to Install
 ==============
 1. Make sure you have `git` and `nodejs` installed (`nvm`/`nvmw` is optional)
 2. `npm install -g vend-tools`
-3. Windows:
-  1. run `where vend-tools`, you will see something similar to:
-  ```
+3. Depending on the platform:
+  1. Windows:
+    1. run `where vend-tools`, you will see something similar to:
+    ```
     C:\Users\fermyoninc\.nvmw\v0.10.36\vend-tools.cmd
-  ```
-  2. copy the part before `vend-tools.cmd` and add `node_modules\vend-tools` to it which will result in something similar to: `C:\Users\fermyoninc\.nvmw\v0.10.36\node_modules\vend-tools`
-  3. navigate to that directory: `cd C:\Users\fermyoninc\.nvmw\v0.10.36\node_modules\vend-tools` then move on to the next step
-4. Mac:
-  1. run `which vend-tools`, you will see something similar to:
-  ```
+    ```
+    2. copy the part before `vend-tools.cmd` and add `node_modules\vend-tools` to it which will result in something similar to: `C:\Users\fermyoninc\.nvmw\v0.10.36\node_modules\vend-tools`
+    3. navigate to that directory: `cd C:\Users\fermyoninc\.nvmw\v0.10.36\node_modules\vend-tools` then move on to the next step
+  2. Mac:
+    1. run `which vend-tools`, you will see something similar to:
+    ```
     /Users/pulkitsinghal/.nvm/v0.10.36/bin/vend-tools
-  ```
-  2. copy the part before `bin/vend-tools.cmd` and add `lib/node_modules/vend-tools` to it which will result in something similar to: `/Users/pulkitsinghal/.nvm/v0.10.36/lib/node_modules/vend-tools`
-  3. navigate to that directory: `cd /Users/pulkitsinghal/.nvm/v0.10.36/lib/node_modules/vend-tools` then move on to the next step
+    ```
+    2. copy the part before `bin/vend-tools.cmd` and add `lib/node_modules/vend-tools` to it which will result in something similar to: `/Users/pulkitsinghal/.nvm/v0.10.36/lib/node_modules/vend-tools`
+    3. navigate to that directory: `cd /Users/pulkitsinghal/.nvm/v0.10.36/lib/node_modules/vend-tools` then move on to the next step
 5. *[Optional]* Create `client.json` and `oauth.json` files so that you don't need to type in really long commands
   1. You need your own vend credentials to make vend-tools work so goto https://developers.vendhq.com/ and `Register as a developer` then create a new application for yourself at https://developers.vendhq.com/developer/applications
   2. Now you have two choices:
