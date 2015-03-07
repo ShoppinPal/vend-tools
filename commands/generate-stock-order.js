@@ -134,9 +134,28 @@ var chooseInterval = function(){
     .then(function (resolvedResults/*err, startAnalyzingSalesHistorySince, indexOfSelectedValue*/) {
       var startAnalyzingSalesHistorySince = resolvedResults[0];
       var indexOfSelectedValue = resolvedResults[1];
+      if (startAnalyzingSalesHistorySince.toUpperCase() === 'other'.toUpperCase()) {
+        return asking.askAsync('Please provide a starting date in YYYY-MM-DD format: ')
+          .then(function (resolvedResults) {
+            var beginAt = resolvedResults;
+            if (beginAt.length!=10){
+              return Promise.reject('Invalid input...');
+            }
+            beginAt = moment.utc(beginAt, 'YYYY-MM-DD');
+            console.log('You selected: ' + beginAt.format('YYYY-MM-DD'));
+            return(beginAt);
+          })
+          .catch(function(e) {
+            console.error(commandName + ' > An unexpected error occurred: ', e);
+            console.log('Try again...');
+            return chooseInterval();
+          });
+      }
+      else {
       var since = intervalOptions[indexOfSelectedValue];
       console.log('startAnalyzingSalesHistorySince: ' + since.format('YYYY-MM-DD'));
       return Promise.resolve(since);
+      }
     })
     .catch(function(e) {
       //console.error(commandName + ' > An unexpected error occurred: ', e);
