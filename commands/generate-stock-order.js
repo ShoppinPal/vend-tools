@@ -62,10 +62,14 @@ var GenerateStockOrder = Command.extend({
     interval: {
       type: 'string',
       aliases: ['i']
+    },
+    beginFrom: { // alternative to interval specified as a date in YYYY-MM-DD format
+      type: 'string',
+      aliases: ['b']
     }
   },
 
-  run: function (orderName, outletId, supplierId, interval) {
+  run: function (orderName, outletId, supplierId, interval, beginFrom) {
     var token = this.global.token;
     var domain = this.global.domain;
 
@@ -86,18 +90,37 @@ var GenerateStockOrder = Command.extend({
       })
       .then(function(resolvedOutletId){
         outletId = resolvedOutletId;
+        if (beginFrom) {
+          return validateBeginFrom(beginFrom);
+        }
+        else {
         return validateInterval(interval);
+        }
       })
       .then(function(since){
+        var iORb = (interval) ? (' -i ' + interval) : (' -b ' + since.format('YYYY-MM-DD'));
         console.log('vend-tools ' + commandName +
           ' -n ' + orderName +
           ' -o ' + outletId +
           ' -s ' + supplierId +
-          ' -i ' + interval);
+            iORb
+        );
         runMe(connectionInfo, orderName, outletId, supplierId, since);
       });
   }
 });
+
+var validateBeginFrom = function(beginFrom) {
+  if (beginFrom) {
+    var since = moment.utc(firstDayOfWeek, 'YYYY-MM-DD');
+    console.log('validateBeginFrom > since: ' + since);
+    console.log('startAnalyzingSalesHistorySince: ' + since.format('YYYY-MM-DD'));
+    return Promise.resolve(since);
+  }
+  else {
+    return Promise.reject('--beginFrom or -b should be a date in YYYY-MM-DD format');
+  }
+};
 
 var validateInterval = function(interval) {
   if (interval) {
