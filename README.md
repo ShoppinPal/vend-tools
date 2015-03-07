@@ -68,7 +68,7 @@ How to Install
     ```
     2. copy the part before `bin/vend-tools.cmd` and add `lib/node_modules/vend-tools` to it which will result in something similar to: `/Users/pulkitsinghal/.nvm/v0.10.36/lib/node_modules/vend-tools`
     3. navigate to that directory: `cd /Users/pulkitsinghal/.nvm/v0.10.36/lib/node_modules/vend-tools` then move on to the next step
-5. *[Optional]* Create `client.json` and `oauth.json` files so that you don't need to type in really long commands
+4. Create `client.json` and `oauth.json` files so that you don't need to type in really long commands
   1. You need your own vend credentials to make vend-tools work so goto https://developers.vendhq.com/ and `Register as a developer` then create a new application for yourself at https://developers.vendhq.com/developer/applications
   2. Now you have two choices:
     1. Use the tooling provided by the runscope website for getting Vend OAuth tokens: https://www.runscope.com/oauth2_tool
@@ -93,7 +93,7 @@ How to Install
   }
   ```
   5. *[Optional]* Edit `settings.json` if you want to set a default output directory etc.
-6. Start using from anywhere in the command-line/terminal: `vend-tools`
+5. Start using from anywhere in the command-line/terminal: `vend-tools`
 
 Simple-Legal-Speak
 ==================
