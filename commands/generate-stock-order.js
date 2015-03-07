@@ -20,19 +20,23 @@ var commandName = path.basename(__filename, '.js'); // gives the filename withou
 // Global variables for interval
 var aWeekAgo = moment.utc().subtract(1, 'weeks');
 var twoWeeksAgo = moment.utc().subtract(2, 'weeks');
-var aMonthAgo = moment.utc().subtract(1, 'months');
-var twoMonthsAgo = moment.utc().subtract(2, 'months');
+var aMonthAgo = moment.utc().subtract(4, 'weeks');
+var sixWeeksAgo = moment.utc().subtract(6, 'weeks');
+var twoMonthsAgo = moment.utc().subtract(8, 'weeks');
 var intervalOptions = [
   aWeekAgo,
   twoWeeksAgo,
   aMonthAgo,
+  sixWeeksAgo,
   twoMonthsAgo
 ];
 var intervalOptionsForDisplay = [
     'Starting a week ago (' + aWeekAgo.format('YYYY-MM-DD') + ')',
     'Starting two weeks ago (' + twoWeeksAgo.format('YYYY-MM-DD') + ')',
     'Starting a month ago (' + aMonthAgo.format('YYYY-MM-DD') + ')',
-    'Starting two months ago (' + twoMonthsAgo.format('YYYY-MM-DD') + ')'
+    'Starting six weeks ago (' + sixWeeksAgo.format('YYYY-MM-DD') + ')',
+    'Starting two months ago (' + twoMonthsAgo.format('YYYY-MM-DD') + ')',
+    'other'
 ];
 
 var selectedSupplierName = null;
@@ -108,8 +112,11 @@ var validateInterval = function(interval) {
       case '1m':
         since = intervalOptions[2];
         break;
-      case '2m':
+      case '6w':
         since = intervalOptions[3];
+        break;
+      case '2m':
+        since = intervalOptions[4];
         break;
       default:
         throw new Error('--interval should be set as 1w or 2w or 1m or 2m');
