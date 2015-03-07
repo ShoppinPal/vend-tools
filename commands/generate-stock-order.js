@@ -12,6 +12,7 @@ var fileSystem = require('q-io/fs');
 var moment = require('moment');
 var _ = require('underscore');
 var path = require('path');
+var open = require('open');
 
 // Global variable for logging
 var commandName = path.basename(__filename, '.js'); // gives the filename without the .js extension
@@ -492,8 +493,9 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
                 {concurrency: 1}
               )
                 .then(function(){
-                  console.log('You can access your stock order at: ' +
-                    'https://' + connectionInfo.domainPrefix + '.vendhq.com/consignment/' + newStockOrder.id);
+                  var accessAtUrl = 'https://' + connectionInfo.domainPrefix + '.vendhq.com/consignment/' + newStockOrder.id;
+                  console.log('You can access your stock order at: ' + accessAtUrl);
+                  open(accessAtUrl);
                 });
             });
         });
