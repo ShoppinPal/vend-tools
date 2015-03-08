@@ -166,7 +166,7 @@ var chooseInterval = function(){
             }
             beginAt = moment.utc(beginAt, 'YYYY-MM-DD');
             console.log('You selected: ' + beginAt.format('YYYY-MM-DD'));
-            return(beginAt);
+            return Promise.resolve(beginAt);
           })
           .catch(function(e) {
             console.error(commandName + ' > An unexpected error occurred: ', e);
