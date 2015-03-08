@@ -483,6 +483,9 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
       var orderProducts = _.extend({},productsWithSufficientStockOnHand, productsToOrderBasedOnSalesData);
 
       var consignmentProductsArray = [];
+      productsToOrderBasedOnSalesData = _.sortBy(productsToOrderBasedOnSalesData,function(product){
+        return product.name;
+      });
       _.each(productsToOrderBasedOnSalesData,function(product, productId){
         consignmentProductsArray.push({
           //'sequence_number': 'Smart',
@@ -492,6 +495,9 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
           'cost': product.supply_price
         });
       });
+      productsToOrderBasedOnVendMechanics = _.sortBy(productsToOrderBasedOnVendMechanics,function(product){
+        return product.name;
+      });
       _.each(productsToOrderBasedOnVendMechanics,function(product, productId){
         consignmentProductsArray.push({
           //'sequence_number': 'Vend',
@@ -500,6 +506,9 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
           'count': product.inventory.restock_level,
           'cost': product.supply_price
         });
+      });
+      productsWithSufficientStockOnHand = _.sortBy(productsWithSufficientStockOnHand,function(product){
+        return product.name;
       });
       _.each(productsWithSufficientStockOnHand,function(product, productId){
         consignmentProductsArray.push({
