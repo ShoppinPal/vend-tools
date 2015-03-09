@@ -53,47 +53,15 @@ How to Install
 ==============
 1. Make sure you have `git` and `nodejs` installed (`nvm`/`nvmw` is optional)
 2. `npm install -g vend-tools`
-3. Depending on the platform:
-  1. Windows:
-    1. run `where vend-tools`, you will see something similar to:
-    ```
-    C:\Users\fermyoninc\.nvmw\v0.10.36\vend-tools.cmd
-    ```
-    2. copy the part before `vend-tools.cmd` and add `node_modules\vend-tools` to it which will result in something similar to: `C:\Users\fermyoninc\.nvmw\v0.10.36\node_modules\vend-tools`
-    3. navigate to that directory: `cd C:\Users\fermyoninc\.nvmw\v0.10.36\node_modules\vend-tools` then move on to the next step
-  2. Mac:
-    1. run `which vend-tools`, you will see something similar to:
-    ```
-    /Users/pulkitsinghal/.nvm/v0.10.36/bin/vend-tools
-    ```
-    2. copy the part before `bin/vend-tools.cmd` and add `lib/node_modules/vend-tools` to it which will result in something similar to: `/Users/pulkitsinghal/.nvm/v0.10.36/lib/node_modules/vend-tools`
-    3. navigate to that directory: `cd /Users/pulkitsinghal/.nvm/v0.10.36/lib/node_modules/vend-tools` then move on to the next step
-4. Create `client.json` and `oauth.json` files so that you don't need to type in really long commands
+3. Create `client.json` and `oauth.json` files so that you don't need to type in really long commands
   1. You need your own vend credentials to make vend-tools work so goto https://developers.vendhq.com/ and `Register as a developer` then create a new application for yourself at https://developers.vendhq.com/developer/applications
   2. Now you have two choices:
     1. Use the tooling provided by the runscope website for getting Vend OAuth tokens: https://www.runscope.com/oauth2_tool
       1. Authorize URL: `https://{DOMAIN_PREFIX}.vendhq.com/connect`      
       2. Access Token URL: `https://{DOMAIN_PREFIX}.vendhq.com/api/1.0/token`
     2. Or, you may refer to our example https://github.com/ShoppinPal/vend-oauth-example
-  3. Afterwards, the following sample `client.json` file template can be filled out and used:
-  ```
-  {
-    "token_service": "https://{DOMAIN_PREFIX}.vendhq.com/api/1.0/token",
-    "client_id": "fill it in",
-    "client_secret": "fill it in"
-  }
-  ```
-  4. Here's a sample `oauth.json` file template for you to fill out and use:
-  ```
-  {
-    "access_token": "fill it in",
-    "token_type": "Bearer",
-    "refresh_token": "fill it in",
-    "domain_prefix": "fill it in"
-  }
-  ```
-  5. *[Optional]* Edit `settings.json` if you want to set a default output directory etc.
-5. Start using from anywhere in the command-line/terminal: `vend-tools`
+  3. Afterwards, with all the above information in hand, run `vend-tools configure`
+4. Start using from anywhere in the command-line/terminal: `vend-tools`
 
 Simple-Legal-Speak
 ==================
