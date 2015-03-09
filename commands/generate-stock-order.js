@@ -316,7 +316,7 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
     .then(function(filteredProducts) {
       // let's dilute the product data even further
       var dilutedProducts = _.object(_.map(filteredProducts, function(product) {
-        var neoProduct =  _.pick(product,'name','supply_price');
+        var neoProduct =  _.pick(product,'name','supply_price','id');
         neoProduct.inventory = _.find(product.inventory, function(inv){
           return inv.outlet_id === outletId;
         });
@@ -490,7 +490,7 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
         consignmentProductsArray.push({
           //'sequence_number': 'Smart',
           'sequence_number': '1', // lets make this code for productsToOrderBasedOnSalesData
-          'product_id': productId,
+          'product_id': product.id,
           'count': product.orderMore,
           'cost': product.supply_price
         });
@@ -502,7 +502,7 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
         consignmentProductsArray.push({
           //'sequence_number': 'Vend',
           'sequence_number': '2', // lets make this code for productsToOrderBasedOnVendMechanics
-          'product_id': productId,
+          'product_id': product.id,
           'count': product.inventory.restock_level,
           'cost': product.supply_price
         });
@@ -514,7 +514,7 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
         consignmentProductsArray.push({
           //'sequence_number': 'Manual',
           'sequence_number': '3', // lets make this code for productsWithSufficientStockOnHand
-          'product_id': productId,
+          'product_id': product.id,
           'count': product.orderMore,
           'cost': product.supply_price
         });
@@ -564,7 +564,7 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
             consignmentProductsArray.push({
               //'sequence_number': 'Smart', // lets make this code for productsToOrderBasedOnSalesData
               'sequence_number': consignmentProductsArray.length + 1,
-              'product_id': productId,
+              'product_id': product.id,
               'count': product.orderMore,
               'cost': product.supply_price
             });
