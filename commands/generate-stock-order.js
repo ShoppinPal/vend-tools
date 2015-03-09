@@ -94,7 +94,7 @@ var GenerateStockOrder = Command.extend({
           return validateBeginFrom(beginFrom);
         }
         else {
-        return validateInterval(interval);
+          return validateInterval(interval);
         }
       })
       .then(function(since){
@@ -175,9 +175,9 @@ var chooseInterval = function(){
           });
       }
       else {
-      var since = intervalOptions[indexOfSelectedValue];
-      console.log('startAnalyzingSalesHistorySince: ' + since.format('YYYY-MM-DD'));
-      return Promise.resolve(since);
+        var since = intervalOptions[indexOfSelectedValue];
+        console.log('startAnalyzingSalesHistorySince: ' + since.format('YYYY-MM-DD'));
+        return Promise.resolve(since);
       }
     })
     .catch(function(e) {
@@ -194,7 +194,7 @@ var validateSupplier = function(supplierId, connectionInfo) {
       .then(function(supplier){
         //console.log(supplier);
         selectedSupplierName = supplier.name;
-    return Promise.resolve(supplierId);
+        return Promise.resolve(supplierId);
       });
   }
   else {
@@ -325,7 +325,7 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
       console.log(commandName + ' > diluted products.length: ' + _.keys(dilutedProducts).length);
 
       return utils.exportToJsonFileFormat(commandName+'-dilutedProducts', dilutedProducts)
-    .then(function() {
+        .then(function() {
           return Promise.resolve(dilutedProducts);
         });
     })
@@ -363,18 +363,13 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
                       //productSales[lineitem.product_id] = lineitem.quantity;
                       productSales[lineitem.product_id] = _.pick(lineitem, 'name', 'quantity');
                     }
-        });
+                  });
                   console.log('productSales.length: ' + _.keys(productSales).length);
                   return utils.exportToJsonFileFormat(commandName+'-productSales', productSales)
                     .then(function() {
                       // iterate over products and generate ConsignmentProducts
-                      //       ... do the math based on stock-on-hand (product.inventory.count)
-                      //       and stock-sold (productSales.quantity)
-
-                      // (1) reorder quantity (restock_level?) is 0, do nothing
-                      //     reorder_point is the level stock must get to before Vend identifies it as 'low stock'
-                      //     restock_level is the amount of stock to automatically reorder
-                      var discontinuedProducts = {};
+                      // ... do the math based on stock-on-hand (product.inventory.count)
+                      // and stock-sold (productSales.quantity)
 
                       // (2) No sales history and 30 are still in stock, in a separate stockOrder,
                       //     place order for restock_level if 30 <= reorder_point
@@ -393,42 +388,37 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
                       var positiveStockProductsToOrder = {};
 
                       _.each(dilutedProducts, function(product, productId){
-                        if (product.inventory.restock_level==0 /*&& product.inventory.reorder_point==0*/) {
-                          discontinuedProducts[productId] = product;
-                        }
-                        else {
-                          var productSalesHistory = productSales[productId];
-                          if (productSalesHistory){
-                            product.sold = productSalesHistory.quantity;
-                            if (product.inventory.count < 0) {
-                              // (4) 30 sold and -5 still in stock, ignore negative inventory,
-                              //     so order 30 more units for the next interval
-                              product.orderMore = productSalesHistory.quantity;
-                              negativeStockProductsToOrder[productId] = product;
-                            }
-                            else {
-                              var difference = productSalesHistory.quantity - product.inventory.count;
-                              if (difference == 0) {
-                                // (5) 30 sold and 0 still in stock, 30-0=30, order 30 more units for the next interval
-                                product.orderMore = difference;
-                                zeroStockProductsToOrder[productId] = product;
-                              }
-                              else if (difference > 0){
-                                // (6) 30 sold and 5 still in stock, 30-5=25, so order 25 more units for the next interval
-                                product.orderMore = difference;
-                                positiveStockProductsToOrder[productId] = product;
-                              }
-                              else {
-                                // (3) 5 sold and 30 still in stock, 5-30=-25, no need to order anymore,
-                                //     but still create a 0 quantity line item so retailer may adjust if necessary
-                                product.orderMore = 0;
-                                productsWithSufficientStockOnHand[productId] = product;
-                              }
-                            }
+                        var productSalesHistory = productSales[productId];
+                        if (productSalesHistory){
+                          product.sold = productSalesHistory.quantity;
+                          if (product.inventory.count < 0) {
+                            // (4) 30 sold and -5 still in stock, ignore negative inventory,
+                            //     so order 30 more units for the next interval
+                            product.orderMore = productSalesHistory.quantity;
+                            negativeStockProductsToOrder[productId] = product;
                           }
                           else {
-                            productsToOrderBasedOnVendMechanics[productId] = product;
+                            var difference = productSalesHistory.quantity - product.inventory.count;
+                            if (difference == 0) {
+                              // (5) 30 sold and 0 still in stock, 30-0=30, order 30 more units for the next interval
+                              product.orderMore = difference;
+                              zeroStockProductsToOrder[productId] = product;
+                            }
+                            else if (difference > 0){
+                              // (6) 30 sold and 5 still in stock, 30-5=25, so order 25 more units for the next interval
+                              product.orderMore = difference;
+                              positiveStockProductsToOrder[productId] = product;
+                            }
+                            else {
+                              // (3) 5 sold and 30 still in stock, 5-30=-25, no need to order anymore,
+                              //     but still create a 0 quantity line item so retailer may adjust if necessary
+                              product.orderMore = 0;
+                              productsWithSufficientStockOnHand[productId] = product;
+                            }
                           }
+                        }
+                        else {
+                          productsToOrderBasedOnVendMechanics[productId] = product;
                         }
                       });
 
@@ -438,17 +428,13 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
                         negativeStockProductsToOrder, zeroStockProductsToOrder, positiveStockProductsToOrder);
 
                       // print the length and then push each array out to a JSON file of its own
-                      console.log('discontinuedProducts.length', _.keys(discontinuedProducts).length);
                       console.log('productsWithSufficientStockOnHand.length', _.keys(productsWithSufficientStockOnHand).length);
                       console.log('productsToOrderBasedOnVendMechanics.length', _.keys(productsToOrderBasedOnVendMechanics).length);
                       console.log('negativeStockProductsToOrder.length', _.keys(negativeStockProductsToOrder).length);
                       console.log('zeroStockProductsToOrder.length', _.keys(zeroStockProductsToOrder).length);
                       console.log('positiveStockProductsToOrder.length', _.keys(positiveStockProductsToOrder).length);
                       console.log('productsToOrderBasedOnSalesData.length', _.keys(productsToOrderBasedOnSalesData).length);
-                      return utils.exportToJsonFileFormat(commandName+'-x1Disc', discontinuedProducts)
-                        .then(function(){
-                          return utils.exportToJsonFileFormat(commandName+'-x2Suff', productsWithSufficientStockOnHand)
-                        })
+                      return utils.exportToJsonFileFormat(commandName+'-x2Suff', productsWithSufficientStockOnHand)
                         .then(function(){
                           return utils.exportToJsonFileFormat(commandName+'-x3Vend', productsToOrderBasedOnVendMechanics)
                         })
@@ -527,11 +513,11 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
           argsForStockOrder.outletId.value = outletId;
           argsForStockOrder.supplierId.value = supplierId;
           return vendSdk.consignments.stockOrders.create(argsForStockOrder, connectionInfo)
-        .then(function(newStockOrder) {
-          console.log(commandName + ' > ZZZ then block');
+            .then(function(newStockOrder) {
+              console.log(commandName + ' > ZZZ then block');
 
-          stockOrder = newStockOrder;
-          console.log('stockOrder: ', stockOrder);
+              stockOrder = newStockOrder;
+              console.log('stockOrder: ', stockOrder);
 
               // attach stock order to all consignmentProducts
               _.each(consignmentProductsArray,function(consignmentProduct){
