@@ -300,6 +300,7 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
       // keep only the products that have an inventory field
       // and belong to the store/outlet of interest to us
       // and belong to the supplier of interest to us
+      console.log(commandName + ' > filtering for supplier ' + selectedSupplierName + ' and outlet ' + outletId);
       var filteredProducts = _.filter(products, function(product){
         return ( product.inventory &&
                  _.contains(_.pluck(product.inventory,'outlet_id'), outletId) &&
@@ -342,9 +343,16 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
 
       return vendSdk.sales.fetchAll(argsForSales,connectionInfo)
         .then(function(sales) {
-          console.log('sales.length: ' + sales.length);
+          console.log('original sales.length: ' + sales.length);
 
-          return utils.exportToJsonFileFormat(commandName+'-sales', sales)
+          return utils.exportToJsonFileFormat(commandName+'-salesOrig', sales)
+            .then(function() {
+              sales = _.filter(sales, function(sale){
+                return moment.utc(sale.sale_date).isAfter(since);
+              });
+              console.log('filtered sales.length: ' + sales.length);
+              return utils.exportToJsonFileFormat(commandName+'-salesSince', sales)
+            })
             .then(function() {
               var lineitems = _.flatten(_.pluck(sales,'register_sale_products'));
               console.log('lineitems.length: ' + lineitems.length);
