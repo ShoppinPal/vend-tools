@@ -52,15 +52,14 @@ Pre-requisites for mac
 How to Install
 ==============
 1. Make sure you have `git` and `nodejs` installed (`nvm`/`nvmw` is optional)
-2. `npm install -g vend-tools`
-3. Create `client.json` and `oauth.json` files so that you don't need to type in really long commands
-  1. You need your own vend credentials to make vend-tools work so goto https://developers.vendhq.com/ and `Register as a developer` then create a new application for yourself at https://developers.vendhq.com/developer/applications
-  2. Now you have two choices:
+2. run: `npm install -g vend-tools`
+3. run: `vend-tools configure`
+  1. You will need your own vend credentials to make vend-tools work so goto https://developers.vendhq.com/ and `Register as a developer` then create a new application for yourself at https://developers.vendhq.com/developer/applications as this will provide you with `client_id` and `client_secret`
+  2. To get `refresh_token` and `access_token`, you have two choices:
     1. Use the tooling provided by the runscope website for getting Vend OAuth tokens: https://www.runscope.com/oauth2_tool
       1. Authorize URL: `https://{DOMAIN_PREFIX}.vendhq.com/connect`      
       2. Access Token URL: `https://{DOMAIN_PREFIX}.vendhq.com/api/1.0/token`
     2. Or, you may refer to our example https://github.com/ShoppinPal/vend-oauth-example
-  3. Afterwards, with all the above information in hand, run `vend-tools configure`
 4. Start using from anywhere in the command-line/terminal: `vend-tools`
 
 Simple-Legal-Speak
