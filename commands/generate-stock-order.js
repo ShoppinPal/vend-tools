@@ -112,7 +112,7 @@ var GenerateStockOrder = Command.extend({
 
 var validateBeginFrom = function(beginFrom) {
   if (beginFrom) {
-    var since = moment.utc(firstDayOfWeek, 'YYYY-MM-DD');
+    var since = moment.utc(beginFrom, 'YYYY-MM-DD');
     console.log('validateBeginFrom > since: ' + since);
     console.log('startAnalyzingSalesHistorySince: ' + since.format('YYYY-MM-DD'));
     return Promise.resolve(since);
@@ -333,7 +333,7 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
     .then(function(dilutedProducts) {
       console.log(commandName + ' > 2nd then block');
 
-      var sinceAsString = since.format('YYYY-MM-DD HH:MM:SS');
+      var sinceAsString = since.format('YYYY-MM-DD');
       /*console.log('since.format(): ' + since.format()); // by default moment formats it as ISO 8601 which is what Vend wants
       console.log('since.format(\'YYYY-MM-DD HH:MM:SS\'): ' + since.format('YYYY-MM-DD HH:MM:SS'));*/
 
