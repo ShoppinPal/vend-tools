@@ -225,6 +225,10 @@ var runMe = function(connectionInfo, outletId, since){
   argsForSales.page = {value:1};
   argsForSales.pageSize = {value:200};
   return vendSdk.sales.fetch(argsForSales, connectionInfo)
+    .tap(function(sales) {
+      console.log(commandName + ' > 1st then block');
+      return utils.updateOauthTokens(connectionInfo);
+    })
     .then(function(sales) {
       console.log('sales: ', sales.register_sales.length);
       console.log('sales.pagination: ', sales.pagination);

@@ -223,6 +223,10 @@ var runMe = function(connectionInfo, outletId, since){
   argsForSales.since.value = sinceAsString;
   argsForSales.outletApiId.value = outletId;
   return vendSdk.sales.fetchAll(argsForSales, connectionInfo)
+    .tap(function(sales) {
+      console.log(commandName + ' > 1st then block');
+      return utils.updateOauthTokens(connectionInfo);
+    })
     .then(function(sales) {
       console.log('original sales.length: ' + sales.length);
 
