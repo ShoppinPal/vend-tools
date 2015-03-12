@@ -80,7 +80,7 @@ var ExportAllSales = Command.extend({
         }
       })
       .then(function(since){
-        var iORb = (interval) ? (' -i ' + interval) : (' -b ' + since.format('YYYY-MM-DD HH:MM:SS'));
+        var iORb = (interval) ? (' -i ' + interval) : (' -b ' + since.format('YYYY-MM-DD'));
         console.log('vend-tools ' + commandName +
           ' -o ' + outletId +
             iORb
@@ -94,7 +94,7 @@ var validateBeginFrom = function(beginFrom) {
   if (beginFrom) {
     var since = moment.utc(beginFrom, 'YYYY-MM-DD');
     console.log('validateBeginFrom > since: ' + since);
-    console.log('startAnalyzingSalesHistorySince: ' + since.format('YYYY-MM-DD HH:MM:SS'));
+    console.log('startAnalyzingSalesHistorySince: ' + since.format('YYYY-MM-DD'));
     return Promise.resolve(since);
   }
   else {
@@ -124,7 +124,7 @@ var validateInterval = function(interval) {
       default:
         throw new Error('--interval should be set as 1w or 2w or 1m or 2m');
     }
-    console.log('startAnalyzingSalesHistorySince: ' + since.format('YYYY-MM-DD HH:MM:SS'));
+    console.log('startAnalyzingSalesHistorySince: ' + since.format('YYYY-MM-DD'));
     return Promise.resolve(since);
   }
   else {
@@ -215,7 +215,7 @@ var chooseOutlet = function(outlets){
 };
 
 var runMe = function(connectionInfo, outletId, since){
-  var sinceAsString = since.format('YYYY-MM-DD HH:MM:SS');
+  var sinceAsString = since.format('YYYY-MM-DD');
   /*console.log('since.format(): ' + since.format()); // by default moment formats it as ISO 8601 which is what Vend wants
    console.log('since.format(\'YYYY-MM-DD HH:MM:SS\'): ' + since.format('YYYY-MM-DD HH:MM:SS'));*/
 
