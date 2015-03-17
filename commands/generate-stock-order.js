@@ -86,26 +86,62 @@ var GenerateStockOrder = Command.extend({
       })
       .then(function(resolvedSupplierId){
         supplierId = resolvedSupplierId;
-        return validateOutlet(outletId, connectionInfo);
-      })
-      .then(function(resolvedOutletId){
-        outletId = resolvedOutletId;
         if (beginFrom) {
           return validateBeginFrom(beginFrom);
         }
         else {
-        return validateInterval(interval);
+          return validateInterval(interval);
         }
       })
+      .tap(function(since){
+        return chooseAllOutlets()
+          .then(function(chooseAll) {
+            if(!chooseAll) {
+              return validateOutlet(outletId, connectionInfo)
+                .then(function(resolvedOutletId) {
+                  outletId = resolvedOutletId;
+                  return Promise.resolve();
+                })
+            }
+            else {
+              outletId = 'ALL';
+              return Promise.resolve();
+            }
+          });
+      })
       .then(function(since){
-        var iORb = (interval) ? (' -i ' + interval) : (' -b ' + since.format('YYYY-MM-DD'));
+        /*var iORb = (interval) ? (' -i ' + interval) : (' -b ' + since.format('YYYY-MM-DD'));
         console.log('vend-tools ' + commandName +
           ' -n ' + orderName +
           ' -o ' + outletId +
           ' -s ' + supplierId +
             iORb
-        );
-        runMe(connectionInfo, orderName, outletId, supplierId, since);
+        );*/
+        if(outletId.toUpperCase() === 'ALL') {
+          var runs = [];
+          return fetchOutlets(connectionInfo)
+            .then(function(outlets){
+              // process for each outlet one by one
+              return Promise.map(
+                _.pluck(outlets,'id'),
+                function(outletId){
+                  return runMe(connectionInfo, orderName, outletId, supplierId, since)
+                    .then(function(data){
+                      console.log('created a consignment for: ', outletId);
+                      return Promise.resolve();
+                    })
+                },
+                {concurrency: 1}
+              )
+                .then(function(){
+                  console.log('orders across all the applicable outlets were created');
+                  return Promise.resolve();
+                });
+            });
+        }
+        else {
+          runMe(connectionInfo, orderName, outletId, supplierId, since);
+        }
       });
   }
 });
@@ -194,7 +230,7 @@ var validateSupplier = function(supplierId, connectionInfo) {
       .then(function(supplier){
         //console.log(supplier);
         selectedSupplierName = supplier.name;
-    return Promise.resolve(supplierId);
+        return Promise.resolve(supplierId);
       });
   }
   else {
@@ -288,6 +324,25 @@ var chooseOutlet = function(outlets){
     });
 };
 
+var chooseAllOutlets = function(){
+  return asking.chooseAsync('Should all outlets, that carry products from the selected supplier, be used?', ['Yes', 'No'])
+    .then(function (resolvedResults/*err, selectedValue, indexOfSelectedValue*/) {
+      var selectedValue = resolvedResults[0];
+      var indexOfSelectedValue = resolvedResults[1];
+      if (selectedValue==='Yes') {
+        return Promise.resolve(true);
+      }
+      else {
+        return Promise.resolve(false);
+      }
+    })
+    .catch(function(e) {
+      //console.error(commandName + ' > An unexpected error occurred: ', e);
+      console.log('Incorrect selection! Please choose 1 or 2');
+      return chooseAllOutlets();
+    });
+};
+
 var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
   return vendSdk.products.fetchAll(connectionInfo)
     .tap(function(products) {
@@ -326,7 +381,7 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
       console.log(commandName + ' > diluted products.length: ' + _.keys(dilutedProducts).length);
 
       return utils.exportToJsonFileFormat(commandName+'-dilutedProducts', dilutedProducts)
-    .then(function() {
+        .then(function() {
           return Promise.resolve(dilutedProducts);
         });
     })
@@ -535,11 +590,11 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
           argsForStockOrder.outletId.value = outletId;
           argsForStockOrder.supplierId.value = supplierId;
           return vendSdk.consignments.stockOrders.create(argsForStockOrder, connectionInfo)
-        .then(function(newStockOrder) {
-          console.log(commandName + ' > ZZZ then block');
+            .then(function(newStockOrder) {
+              console.log(commandName + ' > ZZZ then block');
 
-          stockOrder = newStockOrder;
-          console.log('stockOrder: ', stockOrder);
+              stockOrder = newStockOrder;
+              console.log('stockOrder: ', stockOrder);
 
               // attach stock order to all consignmentProducts
               _.each(consignmentProductsArray,function(consignmentProduct){
