@@ -66,10 +66,15 @@ var GenerateStockOrder = Command.extend({
     beginFrom: { // alternative to interval specified as a date in YYYY-MM-DD format
       type: 'string',
       aliases: ['b']
+    },
+    longOrder: {
+      type: 'boolean',
+      aliases: ['l'],
+      default: false
     }
   },
 
-  run: function (orderName, outletId, supplierId, interval, beginFrom) {
+  run: function (orderName, outletId, supplierId, interval, beginFrom, longOrder) {
     var token = this.global.token;
     var domain = this.global.domain;
 
@@ -125,7 +130,7 @@ var GenerateStockOrder = Command.extend({
               return Promise.map(
                 _.pluck(outlets,'id'),
                 function(outletId){
-                  return runMe(connectionInfo, orderName, outletId, supplierId, since)
+                  return runMe(connectionInfo, orderName, outletId, supplierId, since, longOrder)
                     .then(function(data){
                       console.log('created a consignment for: ', outletId);
                       return Promise.resolve();
@@ -140,7 +145,7 @@ var GenerateStockOrder = Command.extend({
             });
         }
         else {
-          runMe(connectionInfo, orderName, outletId, supplierId, since);
+          runMe(connectionInfo, orderName, outletId, supplierId, since, longOrder);
         }
       });
   }
@@ -343,7 +348,7 @@ var chooseAllOutlets = function(){
     });
 };
 
-var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
+var runMe = function(connectionInfo, orderName, outletId, supplierId, since, generateLongOrder){
   return vendSdk.products.fetchAll(connectionInfo)
     .tap(function(products) {
       return utils.exportToJsonFileFormat(commandName, products)
@@ -538,138 +543,138 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since){
       console.log('productsToOrderBasedOnSalesData.length', _.keys(productsToOrderBasedOnSalesData).length);
       console.log('productSales.length: ' + _.keys(productSales).length);
 
-      //TODO: what should be done about productsToOrderBasedOnVendMechanics?
-      //      should they be populated? does anyone want this feature?
-      //      maybe as a separate stock order?
-
-      // prepare ALL sets of consignmentProducts which will be submitted to Vend
-      var orderProducts = _.extend({},productsWithSufficientStockOnHand, productsToOrderBasedOnSalesData);
-
+      // create a SHORT stock order (consignment w/ SUPPLIER)
       var consignmentProductsArray = [];
-      productsToOrderBasedOnSalesData = _.sortBy(productsToOrderBasedOnSalesData,function(product){
+      productsToOrderBasedOnSalesData = _.sortBy(productsToOrderBasedOnSalesData, function (product) {
         return product.name;
       });
-      _.each(productsToOrderBasedOnSalesData,function(product, productId){
+      _.each(productsToOrderBasedOnSalesData, function (product, productId) {
         consignmentProductsArray.push({
-          //'sequence_number': 'Smart',
-          'sequence_number': '1', // lets make this code for productsToOrderBasedOnSalesData
+          //'sequence_number': 'Smart', // lets make this code for productsToOrderBasedOnSalesData
+          'sequence_number': consignmentProductsArray.length + 1,
           'product_id': product.id,
           'count': product.orderMore,
           'cost': product.supply_price
         });
       });
-      productsToOrderBasedOnVendMechanics = _.sortBy(productsToOrderBasedOnVendMechanics,function(product){
-        return product.name;
-      });
-      _.each(productsToOrderBasedOnVendMechanics,function(product, productId){
-        consignmentProductsArray.push({
-          //'sequence_number': 'Vend',
-          'sequence_number': '2', // lets make this code for productsToOrderBasedOnVendMechanics
-          'product_id': product.id,
-          'count': product.inventory.restock_level,
-          'cost': product.supply_price
-        });
-      });
-      productsWithSufficientStockOnHand = _.sortBy(productsWithSufficientStockOnHand,function(product){
-        return product.name;
-      });
-      _.each(productsWithSufficientStockOnHand,function(product, productId){
-        consignmentProductsArray.push({
-          //'sequence_number': 'Manual',
-          'sequence_number': '3', // lets make this code for productsWithSufficientStockOnHand
-          'product_id': product.id,
-          'count': product.orderMore,
-          'cost': product.supply_price
-        });
-      });
-      return utils.exportToJsonFileFormat(commandName+'-x5OrderLong', consignmentProductsArray)
-        .then(function(){
-          // create a LONG stock order (consignment w/ SUPPLIER)
-          var argsForStockOrder = vendSdk.args.consignments.stockOrders.create();
-          argsForStockOrder.name.value = orderName + '-long';
-          argsForStockOrder.outletId.value = outletId;
-          argsForStockOrder.supplierId.value = supplierId;
-          return vendSdk.consignments.stockOrders.create(argsForStockOrder, connectionInfo)
-            .then(function(newStockOrder) {
-              console.log(commandName + ' > ZZZ then block');
-
-              stockOrder = newStockOrder;
-              console.log('stockOrder: ', stockOrder);
-
-              // attach stock order to all consignmentProducts
-              _.each(consignmentProductsArray,function(consignmentProduct){
-                _.extend(consignmentProduct, {'consignment_id':newStockOrder.id});
-              });
-
-              // submit the each entry from consignmentProductsArray to Vend
-              return Promise.map(
-                consignmentProductsArray,
-                function(consignmentProduct){
-                  return vendSdk.consignments.products.create({body:consignmentProduct}, connectionInfo)
-                    .then(function(data){
-                      console.log('created consignmentProduct: ', data);
-                      return Promise.resolve();
-                    })
-                },
-                {concurrency: 1}
-              )
-                .then(function(){
-                  var accessAtUrl = 'https://' + connectionInfo.domainPrefix + '.vendhq.com/consignment/' + newStockOrder.id;
-                  console.log('You can access your stock order at: ' + accessAtUrl);
-                  open(accessAtUrl);
-                  return Promise.resolve();
-                });
-            });
-        })
-        .then(function() { // create a SHORT stock order (consignment w/ SUPPLIER)
-          consignmentProductsArray = []; // empty out the previous array
-          _.each(productsToOrderBasedOnSalesData, function (product, productId) {
-            consignmentProductsArray.push({
-              //'sequence_number': 'Smart', // lets make this code for productsToOrderBasedOnSalesData
-              'sequence_number': consignmentProductsArray.length + 1,
-              'product_id': product.id,
-              'count': product.orderMore,
-              'cost': product.supply_price
-            });
-          });
-          return utils.exportToJsonFileFormat(commandName+'-x6OrderShort', consignmentProductsArray);
-        })
-        .then(function(){ // create a SHORT stock order (consignment w/ SUPPLIER)
+      return utils.exportToJsonFileFormat(commandName + '-x5OrderShort', consignmentProductsArray)
+        .then(function () { // create a SHORT stock order (consignment w/ SUPPLIER)
           var argsForStockOrder = vendSdk.args.consignments.stockOrders.create();
           argsForStockOrder.name.value = orderName + '-short';
           argsForStockOrder.outletId.value = outletId;
           argsForStockOrder.supplierId.value = supplierId;
           return vendSdk.consignments.stockOrders.create(argsForStockOrder, connectionInfo)
-            .then(function(newStockOrder) {
+            .then(function (newStockOrder) {
               console.log(commandName + ' > ZZZ then block');
 
               stockOrder = newStockOrder;
               console.log('stockOrder: ', stockOrder);
 
               // attach stock order to all consignmentProducts
-              _.each(consignmentProductsArray,function(consignmentProduct){
-                _.extend(consignmentProduct, {'consignment_id':newStockOrder.id});
+              _.each(consignmentProductsArray, function (consignmentProduct) {
+                _.extend(consignmentProduct, {'consignment_id': newStockOrder.id});
               });
 
               // submit the each entry from consignmentProductsArray to Vend
               return Promise.map(
                 consignmentProductsArray,
-                function(consignmentProduct){
-                  return vendSdk.consignments.products.create({body:consignmentProduct}, connectionInfo)
-                    .then(function(data){
+                function (consignmentProduct) {
+                  return vendSdk.consignments.products.create({body: consignmentProduct}, connectionInfo)
+                    .then(function (data) {
                       console.log('created consignmentProduct: ', data);
                       return Promise.resolve();
                     })
                 },
                 {concurrency: 1}
               )
-                .then(function(){
+                .then(function () {
                   var accessAtUrl = 'https://' + connectionInfo.domainPrefix + '.vendhq.com/consignment/' + newStockOrder.id;
                   console.log('You can access your stock order at: ' + accessAtUrl);
                   open(accessAtUrl);
                   return Promise.resolve();
                 });
             });
+        })
+        .then(function() { // create a LONG stock order (consignment w/ SUPPLIER)
+          if (!generateLongOrder) {
+            return Promise.resolve();
+          }
+          consignmentProductsArray = []; // empty out the previous array
+          /*productsToOrderBasedOnSalesData = _.sortBy(productsToOrderBasedOnSalesData,function(product){
+           return product.name;
+           });*/ // this sort has already taken place in SHORT order generation
+          _.each(productsToOrderBasedOnSalesData,function(product, productId){
+            consignmentProductsArray.push({
+              //'sequence_number': 'Smart',
+              'sequence_number': '1', // lets make this code for productsToOrderBasedOnSalesData
+              'product_id': product.id,
+              'count': product.orderMore,
+              'cost': product.supply_price
+            });
+          });
+          productsToOrderBasedOnVendMechanics = _.sortBy(productsToOrderBasedOnVendMechanics,function(product){
+            return product.name;
+          });
+          _.each(productsToOrderBasedOnVendMechanics,function(product, productId){
+            consignmentProductsArray.push({
+              //'sequence_number': 'Vend',
+              'sequence_number': '2', // lets make this code for productsToOrderBasedOnVendMechanics
+              'product_id': product.id,
+              'count': product.inventory.restock_level,
+              'cost': product.supply_price
+            });
+          });
+          productsWithSufficientStockOnHand = _.sortBy(productsWithSufficientStockOnHand,function(product){
+            return product.name;
+          });
+          _.each(productsWithSufficientStockOnHand,function(product, productId){
+            consignmentProductsArray.push({
+              //'sequence_number': 'Manual',
+              'sequence_number': '3', // lets make this code for productsWithSufficientStockOnHand
+              'product_id': product.id,
+              'count': product.orderMore,
+              'cost': product.supply_price
+            });
+          });
+          return utils.exportToJsonFileFormat(commandName+'-x6OrderLong', consignmentProductsArray)
+            .then(function(){
+              // create a LONG stock order (consignment w/ SUPPLIER)
+              var argsForStockOrder = vendSdk.args.consignments.stockOrders.create();
+              argsForStockOrder.name.value = orderName + '-long';
+              argsForStockOrder.outletId.value = outletId;
+              argsForStockOrder.supplierId.value = supplierId;
+              return vendSdk.consignments.stockOrders.create(argsForStockOrder, connectionInfo)
+                .then(function(newStockOrder) {
+                  console.log(commandName + ' > ZZZ then block');
+
+                  stockOrder = newStockOrder;
+                  console.log('stockOrder: ', stockOrder);
+
+                  // attach stock order to all consignmentProducts
+                  _.each(consignmentProductsArray,function(consignmentProduct){
+                    _.extend(consignmentProduct, {'consignment_id':newStockOrder.id});
+                  });
+
+                  // submit the each entry from consignmentProductsArray to Vend
+                  return Promise.map(
+                    consignmentProductsArray,
+                    function(consignmentProduct){
+                      return vendSdk.consignments.products.create({body:consignmentProduct}, connectionInfo)
+                        .then(function(data){
+                          console.log('created consignmentProduct: ', data);
+                          return Promise.resolve();
+                        })
+                    },
+                    {concurrency: 1}
+                  )
+                    .then(function(){
+                      var accessAtUrl = 'https://' + connectionInfo.domainPrefix + '.vendhq.com/consignment/' + newStockOrder.id;
+                      console.log('You can access your stock order at: ' + accessAtUrl);
+                      open(accessAtUrl);
+                      return Promise.resolve();
+                    });
+                });
+            })
         });
     })
     .catch(function(e) {
