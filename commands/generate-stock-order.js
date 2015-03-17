@@ -131,8 +131,8 @@ var GenerateStockOrder = Command.extend({
                 _.pluck(outlets,'id'),
                 function(outletId){
                   return runMe(connectionInfo, orderName, outletId, supplierId, since, longOrder)
-                    .then(function(data){
-                      console.log('created a consignment for: ', outletId);
+                    .then(function(){
+                      console.log('finished stock ordering process for: ', outletId);
                       return Promise.resolve();
                     })
                 },
@@ -563,6 +563,10 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since, gen
           argsForStockOrder.name.value = orderName + '-short';
           argsForStockOrder.outletId.value = outletId;
           argsForStockOrder.supplierId.value = supplierId;
+          if(consignmentProductsArray.length === 0) {
+            console.log('don\'t create a stock order if there\'s nothing to put inside of it for outletId: ' + outletId);
+            return Promise.resolve();
+          }
           return vendSdk.consignments.stockOrders.create(argsForStockOrder, connectionInfo)
             .then(function (newStockOrder) {
               console.log(commandName + ' > ZZZ then block');
@@ -643,6 +647,10 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since, gen
               argsForStockOrder.name.value = orderName + '-long';
               argsForStockOrder.outletId.value = outletId;
               argsForStockOrder.supplierId.value = supplierId;
+              if(consignmentProductsArray.length === 0) {
+                console.log('don\'t create a stock order if there\'s nothing to put inside of it for outletId: ' + outletId);
+                return Promise.resolve();
+              }
               return vendSdk.consignments.stockOrders.create(argsForStockOrder, connectionInfo)
                 .then(function(newStockOrder) {
                   console.log(commandName + ' > ZZZ then block');
