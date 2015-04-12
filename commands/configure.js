@@ -13,13 +13,21 @@ var Configure = Command.extend({
   desc: 'Configures client.json, oauth.json and settings.json for vend-tools',
 
   options: { // must not clash with global aliases: -t -d -f
+    env: 'string'
   },
 
-  run: function () {
+  run: function (env) {
     var nconf = require('nconf');
-    nconf.file('client', { file: path.join(__dirname, '..', 'client.json') });
-    nconf.file('oauth', { file: path.join(__dirname, '..', 'oauth.json') });
-    nconf.file('settings', { file: path.join(__dirname, '..', 'settings.json') });
+    if(env && env.length>0){
+      nconf.file('client', { file: path.join(__dirname, '..', 'client.'+env+'.json') });
+      nconf.file('oauth', { file: path.join(__dirname, '..', 'oauth.'+env+'.json') });
+      nconf.file('settings', { file: path.join(__dirname, '..', 'settings.'+env+'.json') });
+    }
+    else {
+      nconf.file('client', { file: path.join(__dirname, '..', 'client.json') });
+      nconf.file('oauth', { file: path.join(__dirname, '..', 'oauth.json') });
+      nconf.file('settings', { file: path.join(__dirname, '..', 'settings.json') });
+    }
     //console.log(nconf.get());
 
     return getSettingsInfo(nconf)
