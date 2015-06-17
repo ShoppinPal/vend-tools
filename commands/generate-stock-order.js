@@ -560,7 +560,8 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since, gen
       return utils.exportToJsonFileFormat(commandName + '-x5OrderShort', consignmentProductsArray)
         .then(function () { // create a SHORT stock order (consignment w/ SUPPLIER)
           var argsForStockOrder = vendSdk.args.consignments.stockOrders.create();
-          argsForStockOrder.name.value = orderName + '-short';
+          (!generateLongOrder) ? argsForStockOrder.name.value = orderName
+                               : argsForStockOrder.name.value = orderName + '-short';
           argsForStockOrder.outletId.value = outletId;
           argsForStockOrder.supplierId.value = supplierId;
           if(consignmentProductsArray.length === 0) {
