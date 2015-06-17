@@ -544,9 +544,6 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since, gen
       console.log('productSales.length: ' + _.keys(productSales).length);
 
       // create a SHORT stock order (consignment w/ SUPPLIER)
-      if (!generateLongOrder) {
-        return Promise.resolve();
-      }
       var consignmentProductsArray = [];
       productsToOrderBasedOnSalesData = _.sortBy(productsToOrderBasedOnSalesData, function (product) {
         return product.name;
@@ -563,7 +560,8 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since, gen
       return utils.exportToJsonFileFormat(commandName + '-x5OrderShort', consignmentProductsArray)
         .then(function () { // create a SHORT stock order (consignment w/ SUPPLIER)
           var argsForStockOrder = vendSdk.args.consignments.stockOrders.create();
-          argsForStockOrder.name.value = orderName + '-short';
+          (!generateLongOrder) ? argsForStockOrder.name.value = orderName
+                               : argsForStockOrder.name.value = orderName + '-short';
           argsForStockOrder.outletId.value = outletId;
           argsForStockOrder.supplierId.value = supplierId;
           if(consignmentProductsArray.length === 0) {
