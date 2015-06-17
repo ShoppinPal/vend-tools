@@ -544,6 +544,9 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since, gen
       console.log('productSales.length: ' + _.keys(productSales).length);
 
       // create a SHORT stock order (consignment w/ SUPPLIER)
+      if (!generateLongOrder) {
+        return Promise.resolve();
+      }
       var consignmentProductsArray = [];
       productsToOrderBasedOnSalesData = _.sortBy(productsToOrderBasedOnSalesData, function (product) {
         return product.name;
