@@ -71,10 +71,15 @@ var GenerateStockOrder = Command.extend({
       type: 'boolean',
       aliases: ['l'],
       default: false
+    },
+    updateRestock: {
+      type: 'boolean',
+      aliases: ['r'],
+      default: false
     }
   },
 
-  run: function (orderName, outletId, supplierId, interval, beginFrom, longOrder) {
+  run: function (orderName, outletId, supplierId, interval, beginFrom, longOrder, updateRestock) {
     var token = this.global.token;
     var domain = this.global.domain;
 
@@ -130,7 +135,7 @@ var GenerateStockOrder = Command.extend({
               return Promise.map(
                 _.pluck(outlets,'id'),
                 function(outletId){
-                  return runMe(connectionInfo, orderName, outletId, supplierId, since, longOrder)
+                  return runMe(connectionInfo, orderName, outletId, supplierId, since, longOrder,updateRestock)
                     .then(function(){
                       console.log('finished stock ordering process for: ', outletId);
                       return Promise.resolve();
@@ -145,7 +150,7 @@ var GenerateStockOrder = Command.extend({
             });
         }
         else {
-          runMe(connectionInfo, orderName, outletId, supplierId, since, longOrder);
+          runMe(connectionInfo, orderName, outletId, supplierId, since, longOrder,updateRestock);
         }
       });
   }
@@ -348,10 +353,10 @@ var chooseAllOutlets = function(){
     });
 };
 
-var runMe = function(connectionInfo, orderName, outletId, supplierId, since, generateLongOrder){
+var runMe = function(connectionInfo, orderName, outletId, supplierId, since, generateLongOrder, updateInventoryRestock){
   return vendSdk.products.fetchAll(connectionInfo)
     .tap(function(products) {
-      return utils.exportToJsonFileFormat(commandName, products)
+      return utils.exportToJsonFileFormat(commandName, products);
     })
     .then(function(products) {
       console.log(commandName + ' > 1st tap block');
@@ -599,6 +604,43 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since, gen
                   return Promise.resolve();
                 });
             });
+        })
+        .then(function(){
+          //This then block will run if user wants to update the restock levels to match the order levels for products to order based on sales data,
+          // he has to specially include the true flag in the original command line argument. It will update the restock level and reorder point of the product
+          //in Vend itself through API call
+
+          /*If a generate order report is about to order 30 more units of a product then the restock_level should be set to 30 and the reorder_point
+          should be 29 in vend via an API call. This feature should be optional, meaning someone has to say they want it in the original cmd-line
+          prompts when starting the script, otherwise it should not kick-in.*/
+
+          if (!updateInventoryRestock){
+            console.log('Skipping update restock levels call');
+            return Promise.resolve();
+          }
+
+          console.log('productsToOrderBasedOnSalesData', JSON.stringify(productsToOrderBasedOnSalesData,null,2));
+          _.each(productsToOrderBasedOnSalesData, function(product){
+            console.log('product: '+ JSON.stringify(product,null,2));
+            //console.log('Count: '+ product.orderMore);
+
+            var updateData =  {
+              "id": product.id,
+              "inventory": [
+                {
+                  "outlet_id": outletId,
+                  "reorder_point": product.orderMore - 1,
+                  "restock_level": product.orderMore
+                }
+              ]
+            };
+            //update call to Vend API product endpoint along with new values for reorder point and restock level
+            return vendSdk.products.update({apiId:{value: product.id},body:{value: updateData}},connectionInfo)
+              .then(function(response){
+                //console.log('Response from update product: '+ JSON.stringify(response,null,2));
+                return Promise.resolve();
+              });
+          });
         })
         .then(function() { // create a LONG stock order (consignment w/ SUPPLIER)
           if (!generateLongOrder) {
