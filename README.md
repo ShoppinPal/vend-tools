@@ -73,3 +73,7 @@ Who are we?
 ===========
 
 ShoppinPal is a team of engineers and product guys with background in developing core systems at well-known Silicon Valley companies. We have deep expertise with Vend APIs. Several retailers use our ecommerce add-on, which works beautifully with Vend. We would love to assist you with any custom development needs that help you get the most out of Vend. We are listed in http://www.vendhq.com/expert-directory?region=0&service=12
+
+Contributors
+============
+To avoid getting confused between the globally installed version of `vend-tools` and the one under active development, please use `node index.js` from the project root directory to test your ongoing changes.
