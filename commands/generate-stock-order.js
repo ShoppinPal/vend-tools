@@ -135,7 +135,7 @@ var GenerateStockOrder = Command.extend({
               return Promise.map(
                 _.pluck(outlets,'id'),
                 function(outletId){
-                  return runMe(connectionInfo, orderName, outletId, supplierId, since, longOrder,updateRestock)
+                  return runMe(connectionInfo, orderName, outletId, supplierId, since, longOrder, updateRestock)
                     .then(function(){
                       console.log('finished stock ordering process for: ', outletId);
                       return Promise.resolve();
@@ -150,7 +150,7 @@ var GenerateStockOrder = Command.extend({
             });
         }
         else {
-          runMe(connectionInfo, orderName, outletId, supplierId, since, longOrder,updateRestock);
+          runMe(connectionInfo, orderName, outletId, supplierId, since, longOrder, updateRestock);
         }
       });
   }
@@ -619,28 +619,39 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since, gen
             return Promise.resolve();
           }
 
-          console.log('productsToOrderBasedOnSalesData', JSON.stringify(productsToOrderBasedOnSalesData,null,2));
-          _.each(productsToOrderBasedOnSalesData, function(product){
-            console.log('product: '+ JSON.stringify(product,null,2));
-            //console.log('Count: '+ product.orderMore);
+          //console.log('productsToOrderBasedOnSalesData', JSON.stringify(productsToOrderBasedOnSalesData,null,2));
 
-            var updateData =  {
-              "id": product.id,
-              "inventory": [
-                {
-                  "outlet_id": outletId,
-                  "reorder_point": product.orderMore - 1,
-                  "restock_level": product.orderMore
-                }
-              ]
-            };
-            //update call to Vend API product endpoint along with new values for reorder point and restock level
-            return vendSdk.products.update({apiId:{value: product.id},body:{value: updateData}},connectionInfo)
-              .then(function(response){
-                //console.log('Response from update product: '+ JSON.stringify(response,null,2));
-                return Promise.resolve();
-              });
-          });
+          // submit the each entry from consignmentProductsArray to Vend
+          return Promise.map(
+            productsToOrderBasedOnSalesData,
+            function(product){
+              console.log('product: '+ JSON.stringify(product,null,2));
+              //console.log('Count: '+ product.orderMore);
+
+              var updateData =  {
+                "id": product.id,
+                "inventory": [
+                  {
+                    "outlet_id": outletId,
+                    "reorder_point": product.orderMore - 1, // TODO: don't populate reorder_point as 0 or -1
+                    "restock_level": product.orderMore
+                  }
+                ]
+              };
+
+              //update call to Vend API product endpoint along with new values for reorder point and restock level
+              return vendSdk.products.update({apiId:{value: product.id},body:{value: updateData}},connectionInfo)
+                .then(function(response){
+                  //console.log('Response from update product: '+ JSON.stringify(response,null,2));
+                  return Promise.resolve();
+                })
+            },
+            {concurrency: 1}
+          )
+            .then(function(){
+              console.log('All reorder_point and restock_level values for productsToOrderBasedOnSalesData have been updated');
+              return Promise.resolve();
+            });
         })
         .then(function() { // create a LONG stock order (consignment w/ SUPPLIER)
           if (!generateLongOrder) {
