@@ -628,23 +628,40 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since, gen
               console.log('product: '+ JSON.stringify(product,null,2));
               //console.log('Count: '+ product.orderMore);
 
-              var updateData =  {
-                "id": product.id,
-                "inventory": [
-                  {
-                    "outlet_id": outletId,
-                    "reorder_point": product.orderMore - 1, // TODO: don't populate reorder_point as 0 or -1
-                    "restock_level": product.orderMore
-                  }
-                ]
-              };
+              //when restock-level(product.orderMore) is 0 don't run that script
+              // when restock-level is 1, set reorder-point to 1
+              // when restock-level is 2 or more,set reorder-point to one less than restock-level
+              if(product.orderMore === 0){
+                console.log('No stock order for this product, so resolving an empty promise');
+                return Promise.resolve();
+              }
+              else {
+                var reorderPoint;
+                if(product.orderMore === 1){
+                  reorderPoint = 1;
+                }
+                else{
+                  reorderPoint = product.orderMore - 1;
+                }
 
-              //update call to Vend API product endpoint along with new values for reorder point and restock level
-              return vendSdk.products.update({apiId:{value: product.id},body:{value: updateData}},connectionInfo)
-                .then(function(response){
-                  //console.log('Response from update product: '+ JSON.stringify(response,null,2));
-                  return Promise.resolve();
-                })
+                var updateData =  {
+                  "id": product.id,
+                  "inventory": [
+                    {
+                      "outlet_id": outletId,
+                      "reorder_point": reorderPoint,
+                      "restock_level": product.orderMore
+                    }
+                  ]
+                };
+
+                //update call to Vend API product endpoint along with new values for reorder point and restock level
+                return vendSdk.products.update({apiId:{value: product.id},body:{value: updateData}},connectionInfo)
+                  .then(function(response){
+                    console.log('Response from update product: '+ JSON.stringify(response,null,2));
+                    return Promise.resolve();
+                  })
+              }
             },
             {concurrency: 1}
           )
