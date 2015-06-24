@@ -625,7 +625,7 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since, gen
           return Promise.map(
             productsToOrderBasedOnSalesData,
             function(product){
-              console.log('product: '+ JSON.stringify(product,null,2));
+              //console.log('product: '+ JSON.stringify(product,null,2));
               //console.log('Count: '+ product.orderMore);
 
               //when restock-level(product.orderMore) is 0 don't run that script
@@ -658,7 +658,7 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since, gen
                 //update call to Vend API product endpoint along with new values for reorder point and restock level
                 return vendSdk.products.update({apiId:{value: product.id},body:{value: updateData}},connectionInfo)
                   .then(function(response){
-                    console.log('Response from update product: '+ JSON.stringify(response,null,2));
+                    //console.log('Response from update product: '+ JSON.stringify(response,null,2));
                     return Promise.resolve();
                   })
               }
