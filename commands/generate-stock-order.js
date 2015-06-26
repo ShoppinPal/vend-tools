@@ -631,26 +631,25 @@ var runMe = function(connectionInfo, orderName, outletId, supplierId, since, gen
               //when restock-level(product.orderMore) is 0 don't run that script
               // when restock-level is 1, set reorder-point to 1
               // when restock-level is 2 or more,set reorder-point to one less than restock-level
-              if(product.orderMore === 0){
+              if(product.sold === 0){
                 console.log('No stock order for this product, so resolving an empty promise');
                 return Promise.resolve();
               }
               else {
                 var reorderPoint;
-                if(product.orderMore === 1){
+                if(product.sold === 1){
                   reorderPoint = 1;
                 }
                 else{
-                  reorderPoint = product.orderMore - 1;
+                  reorderPoint = product.sold - 1;
                 }
-
                 var updateData =  {
                   "id": product.id,
                   "inventory": [
                     {
                       "outlet_id": outletId,
                       "reorder_point": reorderPoint,
-                      "restock_level": product.orderMore
+                      "restock_level": product.sold
                     }
                   ]
                 };
