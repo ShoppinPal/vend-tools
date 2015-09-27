@@ -25,8 +25,14 @@ var updateOauthTokens = function(connectionInfo){
 var loadOauthTokens = function(token, domain){
   // (1) Check for oauth.json and client.json via nconf
   var nconf = require('nconf');
-  nconf.file('client', { file: path.join(__dirname, '..', 'client.json') })
-    .file('oauth', { file: path.join(__dirname, '..', 'oauth.json') });
+  if (domain) {
+    nconf.file('client', { file: path.join(__dirname, '..', 'client.'+domain+'.json') })
+      .file('oauth', { file: path.join(__dirname, '..', 'oauth.'+domain+'.json') });
+  }
+  else {
+    nconf.file('client', { file: path.join(__dirname, '..', 'client.json') })
+      .file('oauth', { file: path.join(__dirname, '..', 'oauth.json') });
+  }
   //console.log('nconf.get(): ', nconf.get());
 
   // (2) try to load client_id and client_secret and whatever else
