@@ -9,6 +9,10 @@ var Promise = require('bluebird');
 var moment = require('moment');
 var _ = require('underscore');
 
+var path = require('path');
+var commandName = path.basename(__filename, '.js');
+var logger = console;
+
 var ReportCostsForSuppliers = Command.extend({
   desc: 'Report the costs for each supplier per outlet',
 
@@ -16,6 +20,9 @@ var ReportCostsForSuppliers = Command.extend({
   },
 
   run: function () {
+    if(this.global.debug) {
+      logger = require('tracer').console();
+    }
     var token = this.global.token;
     var domain = this.global.domain;
 
@@ -42,13 +49,13 @@ var ReportCostsForSuppliers = Command.extend({
               throw err;
             }
             else {
-              console.log('You selected: ' + customFirstDayOfWeek);
+              logger.log('You selected: ' + customFirstDayOfWeek);
               runReport(connectionInfo, customFirstDayOfWeek);
             }
           });
         }
         else {
-          console.log('You selected: ' + firstDayOfWeek);
+          logger.log('You selected: ' + firstDayOfWeek);
           runReport(connectionInfo, firstDayOfWeek);
         }
       }
@@ -62,46 +69,46 @@ var runReport = function(connectionInfo, firstDayOfWeek){
   return vendSdk.consignments.stockOrders.fetchAll(
     connectionInfo,
     function customProcessPagedResults(pagedData, previousData){ // example of how to REDUCE paged data in a custom fashion
-      console.log('customProcessPagedResults - pagedData.consignments.length: ', pagedData.consignments.length);
-      console.log('customProcessPagedResults - pagedData.consignments.length: ', pagedData.consignments.length);
+      logger.log('customProcessPagedResults - pagedData.consignments.length: ', pagedData.consignments.length);
+      logger.log('customProcessPagedResults - pagedData.consignments.length: ', pagedData.consignments.length);
       var startDate = moment.utc(firstDayOfWeek, 'YYYY-MM-DD');
       var endDate = moment.utc(firstDayOfWeek, 'YYYY-MM-DD').add(7, 'days');
-      console.log('customProcessPagedResults - startDate: ', startDate.format());
-      console.log('customProcessPagedResults - endDate: ', endDate.format());
+      logger.log('customProcessPagedResults - startDate: ', startDate.format());
+      logger.log('customProcessPagedResults - endDate: ', endDate.format());
       var consignmentsAfterDateX = _.filter(pagedData.consignments, function(consignment){
-        console.log('customProcessPagedResults' +
+        logger.log('customProcessPagedResults' +
           ' - consignment.type: ' + consignment.type +
           ' - consignment.received_at: ' + consignment.received_at);
         var receivedAt = null;
         if(consignment.received_at) {
           receivedAt = moment.utc(consignment.received_at);
-          //console.log('customProcessPagedResults - receivedAt UTC format: ', receivedAt.format());
+          //logger.log('customProcessPagedResults - receivedAt UTC format: ', receivedAt.format());
         }
         return consignment.received_at &&
           receivedAt.isAfter(startDate) &&
           receivedAt.isBefore(endDate) &&
           consignment.type === 'SUPPLIER'; //&& consignment.supplier_id;
       });
-      console.log('customProcessPagedResults - consignmentsAfterDateX: ', consignmentsAfterDateX.length);
-      //console.log('consignmentsAfterDateX: ', consignmentsAfterDateX);
+      logger.log('customProcessPagedResults - consignmentsAfterDateX: ', consignmentsAfterDateX.length);
+      //logger.log('consignmentsAfterDateX: ', consignmentsAfterDateX);
 
       if (previousData && previousData.length>0){
         if (consignmentsAfterDateX.length>0) {
-          console.log('customProcessPagedResults - previousData.length: ', previousData.length);
+          logger.log('customProcessPagedResults - previousData.length: ', previousData.length);
           consignmentsAfterDateX = consignmentsAfterDateX.concat(previousData);
-          console.log('customProcessPagedResults - combinedData.length: ', consignmentsAfterDateX.length);
+          logger.log('customProcessPagedResults - combinedData.length: ', consignmentsAfterDateX.length);
         }
         else {
           consignmentsAfterDateX = previousData;
         }
       }
-      console.log('customProcessPagedResults - finalData.length: ', consignmentsAfterDateX.length);
+      logger.log('customProcessPagedResults - finalData.length: ', consignmentsAfterDateX.length);
       return Promise.resolve(consignmentsAfterDateX); // why do we need a promise?
     })
     .then(function(allConsignmentsAfterDateX){
-      //console.log('allConsignmentsAfterDateX: ', allConsignmentsAfterDateX);
-      console.log('allConsignmentsAfterDateX.length: ', allConsignmentsAfterDateX.length);
-      console.log('====done with example 3====');
+      //logger.log('allConsignmentsAfterDateX: ', allConsignmentsAfterDateX);
+      logger.log('allConsignmentsAfterDateX.length: ', allConsignmentsAfterDateX.length);
+      logger.log('====done with example 3====');
 
       if (allConsignmentsAfterDateX.length > 0) {
         // (5) example: iterate through a collection of consignments and get consignment products for all of them together
@@ -118,7 +125,7 @@ var runReport = function(connectionInfo, firstDayOfWeek){
             var consignmentsMap = _.object(_.map(allConsignmentsAfterDateX, function(consignment) {
               return [consignment.id, consignment]
             }));
-            //console.log('consignmentsMap: ', consignmentsMap);
+            //logger.log('consignmentsMap: ', consignmentsMap);
 
             // (1) iterate through a consignmentsMap and identify all the consignmentsWithoutSupplierId
             var consignmentsWithoutSupplierId = {};
@@ -143,19 +150,19 @@ var runReport = function(connectionInfo, firstDayOfWeek){
                 //consignment.randomProductId = consignmentProduct.id;
               }
             });
-            console.log('consignmentIdToProductIdMap: ', consignmentIdToProductIdMap);
+            logger.log('consignmentIdToProductIdMap: ', consignmentIdToProductIdMap);
 
             // then serially fetch & populate a supplier field with the result from a product API call ...
             return vendSdk.consignments.stockOrders.resolveMissingSuppliers({consignmentIdToProductIdMap: {value:consignmentIdToProductIdMap}}, connectionInfo)
               .then(function(updatedConsignmentIdToProductIdMap){
-                console.log(updatedConsignmentIdToProductIdMap);
+                logger.log(updatedConsignmentIdToProductIdMap);
                 // into its respective consignment in consignmentsWithoutSupplierId ...
                 // make sure that the values are also cross populated into the original consignmentsMap
                 _.each(updatedConsignmentIdToProductIdMap, function(consignmentAndProductAndSupplier){
                   // what we have is a name or code for supplier so we won't fill it into supplier_id
                   consignmentsMap[consignmentAndProductAndSupplier.consignmentId].supplier = consignmentAndProductAndSupplier.supplier;
                 });
-                //console.log('consignmentsMap: ', consignmentsMap);
+                //logger.log('consignmentsMap: ', consignmentsMap);
 
                 return Promise.resolve([allProductsForConsignments, consignmentsMap]);
               });
@@ -163,8 +170,8 @@ var runReport = function(connectionInfo, firstDayOfWeek){
           .then(function(resolvedArray){
             var allProductsForConsignments = resolvedArray[0];
             var consignmentsMap = resolvedArray[1];
-            console.log('====done with example 4====');
-            //console.log('response: ', allProductsForConsignments);
+            logger.log('====done with example 4====');
+            //logger.log('response: ', allProductsForConsignments);
 
 
             // sum the costs per outlet per supplier
@@ -173,7 +180,7 @@ var runReport = function(connectionInfo, firstDayOfWeek){
               // NOTE: each consignment is mapped to exactly one supplier_id and one outlet_id
               var outletId = consignmentsMap[consignmentProduct.consignment_id].outlet_id;
               var supplierId = consignmentsMap[consignmentProduct.consignment_id].supplier_id || consignmentsMap[consignmentProduct.consignment_id].supplier;
-              console.log('outletId: ' + outletId + ' supplier_id: ' + supplierId);
+              logger.log('outletId: ' + outletId + ' supplier_id: ' + supplierId);
               if (!costPerOutletPerSupplier[outletId]) {
                 costPerOutletPerSupplier[outletId] = {};
               }
@@ -199,40 +206,40 @@ var runReport = function(connectionInfo, firstDayOfWeek){
                 costPerOutletPerSupplier[outletId][supplierId]['products']++;
               }
             });
-            //console.log(consignmentsMap);
-            //console.log(costPerOutletPerSupplier);
+            //logger.log(consignmentsMap);
+            //logger.log(costPerOutletPerSupplier);
             return Promise.resolve(costPerOutletPerSupplier);
           })
           .then(function(costPerOutletPerSupplier){
             return vendSdk.outlets.fetch({}, connectionInfo)
               .then(function(outletsResponse) {
-                //console.log('outletsResponse: ', outletsResponse);
-                console.log('outletsResponse.outlets.length: ', outletsResponse.outlets.length);
+                //logger.log('outletsResponse: ', outletsResponse);
+                logger.log('outletsResponse.outlets.length: ', outletsResponse.outlets.length);
                 var outletsMap = _.object(_.map(outletsResponse.outlets, function(outlet) {
                   return [outlet.id, outlet];
                 }));
-                //console.log('outletsMap: ' + JSON.stringify(outletsMap,vendSdk.replacer,2));
+                //logger.log('outletsMap: ' + JSON.stringify(outletsMap,vendSdk.replacer,2));
 
-                console.log('====done with outlets fetch====');
+                logger.log('====done with outlets fetch====');
                 var args = {
                   page:{value: 1},
                   pageSize:{value: 200}
                 };
                 return vendSdk.suppliers.fetch(args, connectionInfo)
                   .then(function(suppliersResponse) {
-                    //console.log('suppliersResponse: ', suppliersResponse);
-                    console.log('suppliersResponse.suppliers.length: ', suppliersResponse.suppliers.length);
+                    //logger.log('suppliersResponse: ', suppliersResponse);
+                    logger.log('suppliersResponse.suppliers.length: ', suppliersResponse.suppliers.length);
                     var suppliersMap = _.object(_.map(suppliersResponse.suppliers, function(supplier) {
                       return [supplier.id, supplier];
                     }));
 
                     //pagination info, if any
-                    console.log('suppliersResponse.results: ' + suppliersResponse.results);
-                    console.log('suppliersResponse.page: ' + suppliersResponse.page);
-                    console.log('suppliersResponse.page_size: ' + suppliersResponse.page_size);
-                    console.log('suppliersResponse.pages: ' + suppliersResponse.pages);
+                    logger.log('suppliersResponse.results: ' + suppliersResponse.results);
+                    logger.log('suppliersResponse.page: ' + suppliersResponse.page);
+                    logger.log('suppliersResponse.page_size: ' + suppliersResponse.page_size);
+                    logger.log('suppliersResponse.pages: ' + suppliersResponse.pages);
                     // TODO: fetchAll suppliers, not piece-meal, otherwise you're just looking at the first 200
-                    console.log('====done with suppliers fetch====');
+                    logger.log('====done with suppliers fetch====');
 
                     // cross reference IDs with friendly-names for outlets and suppliers
                     var newCostPerOutletPerSupplier = {};
@@ -254,9 +261,9 @@ var runReport = function(connectionInfo, firstDayOfWeek){
                         }
                       });
                     });
-                    console.log(JSON.stringify(newCostPerOutletPerSupplier,vendSdk.replacer,2));
+                    logger.log(JSON.stringify(newCostPerOutletPerSupplier,vendSdk.replacer,2));
 
-                    console.log('saving to ' + 'report-for-' + firstDayOfWeek + '.json');
+                    logger.log('saving to ' + 'report-for-' + firstDayOfWeek + '.json');
                     return fileSystem.write(
                       'report-for-' + firstDayOfWeek + '.json',
                       JSON.stringify(newCostPerOutletPerSupplier,vendSdk.replacer,2));
@@ -265,12 +272,12 @@ var runReport = function(connectionInfo, firstDayOfWeek){
           });
       }
       else {
-        console.log('There aren\'t any consignments that were received after ' + firstDayOfWeek);
+        logger.log('There aren\'t any consignments that were received after ' + firstDayOfWeek);
       }
     })
     .then(function() {
-      //console.log('updating oauth.json ... in case there might have been changes');
-      //console.log('Vend Token Details ' + JSON.stringify(connectionInfo,null,2));
+      //logger.log('updating oauth.json ... in case there might have been changes');
+      //logger.log('Vend Token Details ' + JSON.stringify(connectionInfo,null,2));
       return fileSystem.write(
         'oauth.json',
         JSON.stringify({
