@@ -129,11 +129,19 @@ var runReport = function(connectionInfo, firstDayOfWeek){
 
             // (1) iterate through a consignmentsMap and identify all the consignmentsWithoutSupplierId
             var consignmentsWithoutSupplierId = {};
+            var numberOfConsignmentsWithoutSupplierId = 0;
             _.each(consignmentsMap, function(consignment, consignmentId, list){
               if (!consignment.supplier_id) {
                 consignmentsWithoutSupplierId[consignmentId] = consignment;
+                numberOfConsignmentsWithoutSupplierId++;
               }
             });
+            logger.log('numberOfConsignmentsWithoutSupplierId: ', numberOfConsignmentsWithoutSupplierId);
+
+            // finish early if there isn't a need to pad any missing data
+            if(numberOfConsignmentsWithoutSupplierId === 0) {
+              return Promise.resolve([allProductsForConsignments, consignmentsMap]);
+            }
 
             // then iterate through allProductsForConsignments and jot down one product.id for each of these consignmentsWithoutSupplierId
             var consignmentIdToProductIdMap = [];
