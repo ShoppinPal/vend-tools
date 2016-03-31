@@ -12,13 +12,13 @@ var updateOauthTokens = function(connectionInfo){
   var oauthFile = path.join(__dirname, '..', 'oauth.json');
   console.log('oauthFile: ' + oauthFile);
   return fileSystem.write(
-    oauthFile,
-    JSON.stringify({
-      'access_token': connectionInfo.accessToken,
-      'token_type': 'Bearer',
-      'refresh_token': connectionInfo.refreshToken,
-      'domain_prefix': connectionInfo.domainPrefix
-    },null,2));
+      oauthFile,
+      JSON.stringify({
+        'access_token': connectionInfo.accessToken,
+        'token_type': 'Bearer',
+        'refresh_token': connectionInfo.refreshToken,
+        'domain_prefix': connectionInfo.domainPrefix
+      },null,2));
 };
 
 // TODO: add a CLI spinner to indicate file is being saved? Because sometimes the pauses may appear long?
@@ -27,11 +27,11 @@ var loadOauthTokens = function(token, domain){
   var nconf = require('nconf');
   if (domain) {
     nconf.file('client', { file: path.join(__dirname, '..', 'client.'+domain+'.json') })
-      .file('oauth', { file: path.join(__dirname, '..', 'oauth.'+domain+'.json') });
+        .file('oauth', { file: path.join(__dirname, '..', 'oauth.'+domain+'.json') });
   }
   else {
     nconf.file('client', { file: path.join(__dirname, '..', 'client.json') })
-      .file('oauth', { file: path.join(__dirname, '..', 'oauth.json') });
+        .file('oauth', { file: path.join(__dirname, '..', 'oauth.json') });
   }
   //console.log('nconf.get(): ', nconf.get());
 
@@ -59,65 +59,65 @@ var loadOauthTokens = function(token, domain){
 };
 
 /*var exportProductsToDbfFormat = function(products){
-  var dbfkit = require('dbfkit-fork');
-  var DBFWriter = dbfkit.DBFWriter;
+ var dbfkit = require('dbfkit-fork');
+ var DBFWriter = dbfkit.DBFWriter;
 
-  var header = [];
-  _.each(products,function(product){
-    var productKeys = _.keys(product);
-    _.each(productKeys,function(productKey){
+ var header = [];
+ _.each(products,function(product){
+ var productKeys = _.keys(product);
+ _.each(productKeys,function(productKey){
 
-    })
-  });
-  var header = [
-    {
-      name: 'id'
-    }
-    'handle','sku','composite_handle','composite_sku','composite_quantity','name','description','type','variant_option_one_name','variant_option_one_value','variant_option_two_name','variant_option_two_value','variant_option_three_name','variant_option_three_value','tags','supply_price','retail_price',
-    {
-      name: 'name',
-      type: 'C'
-    }, {
-      name: 'gender',
-      type: 'L'
-    }, {
-      name: 'birthday',
-      type: 'D'
-    }, {
-      name: 'stature',
-      type: 'N',
-      precision: '2'
-    }, {
-      name: 'registDate',
-      type: 'C'
-    }
-  ];
+ })
+ });
+ var header = [
+ {
+ name: 'id'
+ }
+ 'handle','sku','composite_handle','composite_sku','composite_quantity','name','description','type','variant_option_one_name','variant_option_one_value','variant_option_two_name','variant_option_two_value','variant_option_three_name','variant_option_three_value','tags','supply_price','retail_price',
+ {
+ name: 'name',
+ type: 'C'
+ }, {
+ name: 'gender',
+ type: 'L'
+ }, {
+ name: 'birthday',
+ type: 'D'
+ }, {
+ name: 'stature',
+ type: 'N',
+ precision: '2'
+ }, {
+ name: 'registDate',
+ type: 'C'
+ }
+ ];
 
-  var doc = [
-    {
-      name: 'charmi',
-      gender: true,
-      birthday: new Date(),
-      stature: 0,
-      registDate: new Date()
-    }, {
-      name: 'asasas',
-      gender: false,
-      birthday: new Date(1935, 1, 2),
-      stature: 1.87,
-      registDate: new Date()
-    }
-  ];
+ var doc = [
+ {
+ name: 'charmi',
+ gender: true,
+ birthday: new Date(),
+ stature: 0,
+ registDate: new Date()
+ }, {
+ name: 'asasas',
+ gender: false,
+ birthday: new Date(1935, 1, 2),
+ stature: 1.87,
+ registDate: new Date()
+ }
+ ];
 
-  var pathName = './dbfout';
-  var fileName = 'people.dbf';
-  var dbfWriter = new DBFWriter(header, doc, fileName, pathName, {
-    encoding: 'gb2312',
-    coverIfFileExist: true
-  });
-  dbfWriter.write();
-  console.log('finish');
-};*/
+ var pathName = './dbfout';
+ var fileName = 'people.dbf';
+ var dbfWriter = new DBFWriter(header, doc, fileName, pathName, {
+ encoding: 'gb2312',
+ coverIfFileExist: true
+ });
+ dbfWriter.write();
+ console.log('finish');
+ };*/
 
 var exportProductsToDbfFileFormat = function(products){
   var dbf = require('dbf');
@@ -132,7 +132,7 @@ var exportProductsToDbfFileFormat = function(products){
   var filename = 'listProducts-' + moment.utc().format('YYYY-MMM-DD_HH-mm-ss') + '.dbf';
   console.log('saving to ' + filename);
   return fileSystem.write(filename, // save to current working directory
-    toBuffer(buf.buffer));
+      toBuffer(buf.buffer));
 };
 
 var toBuffer = function (ab) {
@@ -181,7 +181,7 @@ var exportToJsonFileFormat = function(commandName, data){
     var filename = getAbsoluteFilename(commandName);
     console.log('saving to ' + filename);
     return fileSystem.write(filename, // save to current working directory
-      JSON.stringify(data,vendSdk.replacer,2));
+        JSON.stringify(data,vendSdk.replacer,2));
   }
   else {
     return Promise.reject('no data provided for exportToJsonFileFormat()');
@@ -210,11 +210,11 @@ var exportToCsvFileFormat = function(commandName, data){
     var fs = require('fs');
 
     var csvStream = csv
-      .createWriteStream({headers: true})
-      .transform(function(entry){
-        // flattens json by appending key.paths together
-        return flatten(entry);
-      });
+        .createWriteStream({headers: true})
+        .transform(function(entry){
+          // flattens json by appending key.paths together
+          return flatten(entry);
+        });
 
     var filename = getAbsoluteFilename(commandName, '.csv');
 
@@ -249,15 +249,16 @@ var exportProductsToCsvFileFormat = function(commandName, products, outlets){
   var fs = require('fs');
 
   // NOTE: could also use _.filter() to get keys whose immediate value isn't an object or array
-  var headers = ['id','handle','sku',
+  var headers = ['id','name','handle','sku',
+    'supply_price','retail_price','tax_name',
+    'loyalty_value',
     'composite_handle','composite_sku','composite_quantity',
-    'name'/*,'description'*/,'type',
     'variant_option_one_name','variant_option_one_value',
     'variant_option_two_name','variant_option_two_value',
     'variant_option_three_name','variant_option_three_value',
-    /*'tags',*/'supply_price','retail_price',
-    'account_code','account_code_purchase','brand_name',
-    'supplier_name','supplier_code','active','track_inventory'];
+    'active'/*'description'*/,'type',/*'tags',*/
+    'brand_name','supplier_name','supplier_code',
+    'account_code','account_code_purchase','track_inventory','reorder_point_Main_Outlet','restock_level_Main_Outlet'];
   _.each(outlets, function(outlet){
     headers.push('inventory_'+outlet.name.replace(/ /g, '_'));
     headers.push('reorder_point_'+outlet.name.replace(/ /g, '_'));
@@ -265,60 +266,64 @@ var exportProductsToCsvFileFormat = function(commandName, products, outlets){
     headers.push('outlet_tax_'+outlet.name.replace(/ /g, '_'));
   });
 
-  var csvStream = csv
-    .createWriteStream({headers: headers})
-    .transform(function(product){
-      var neoProduct = _.pick(product,'id','handle','sku',
-        'composite_handle','composite_sku','composite_quantity',
-        'name'/*,'description'*/,'type',
-        'variant_option_one_name','variant_option_one_value',
-        'variant_option_two_name','variant_option_two_value',
-        'variant_option_three_name','variant_option_three_value',
-        /*'tags',*/'supply_price','retail_price',
-        'account_code','account_code_purchase','brand_name',
-        'supplier_name','supplier_code','active','track_inventory');
-      neoProduct['retail_price'] = product['price'];
-      if(product.inventory){
-        _.each(product.inventory, function(inventory){
-          if(inventory.count !== undefined  && inventory.count !== null) {
-            neoProduct['inventory_' + inventory.outlet_name.replace(/ /g, '_')] = inventory.count;
+  return new Promise(function(resolve, reject){
+
+    var csvStream = csv
+        .createWriteStream({headers: headers})
+        .transform(function(product){
+          var neoProduct = _.pick(product,'id','name','handle','sku',
+              'supply_price','retail_price','tax_name',
+              'loyalty_value',
+              'composite_handle','composite_sku','composite_quantity',
+              'variant_option_one_name','variant_option_one_value',
+              'variant_option_two_name','variant_option_two_value',
+              'variant_option_three_name','variant_option_three_value',
+              'active'/*'description'*/,'type',/*'tags',*/
+              'brand_name','supplier_name','supplier_code',
+              'account_code','account_code_purchase','track_inventory','reorder_point_Main_Outlet','restock_level_Main_Outlet');
+          neoProduct['retail_price'] = product['price'];
+          if(product.inventory){
+            _.each(product.inventory, function(inventory){
+              if(inventory.count !== undefined  && inventory.count !== null) {
+                neoProduct['inventory_' + inventory.outlet_name.replace(/ /g, '_')] = inventory.count;
+              }
+              if(inventory.reorder_point !== undefined  && inventory.reorder_point !== null) {
+                neoProduct['reorder_point_' + inventory.outlet_name.replace(/ /g, '_')] = inventory.reorder_point;
+              }
+              if(inventory.restock_level !== undefined  && inventory.restock_level !== null) {
+                neoProduct['restock_level_' + inventory.outlet_name.replace(/ /g, '_')] = inventory.restock_level;
+              }
+            });
           }
-          if(inventory.reorder_point !== undefined  && inventory.reorder_point !== null) {
-            neoProduct['reorder_point_' + inventory.outlet_name.replace(/ /g, '_')] = inventory.reorder_point;
-          }
-          if(inventory.restock_level !== undefined  && inventory.restock_level !== null) {
-            neoProduct['restock_level_' + inventory.outlet_name.replace(/ /g, '_')] = inventory.restock_level;
-          }
+          /*if(product.taxes) {
+           // TODO: need additional API lookups to resolve values for outlet_tax_<storeName>
+           }*/
+          return neoProduct;
         });
-      }
-      /*if(product.taxes) {
-       // TODO: need additional API lookups to resolve values for outlet_tax_<storeName>
-      }*/
-      return neoProduct;
+
+    var filename = getAbsoluteFilename(commandName, '.csv');
+
+    console.log('saving to ' + filename);
+    var writableStream = fs.createWriteStream(filename);
+    writableStream.on('open', function(fd){
+      console.log('will connect csvStream to writableStream');
+      csvStream.pipe(writableStream);
+    });
+    writableStream.on('error', function(error){
+      console.log('something went wrong with the writableStream');
+      console.log(error);
+      reject(error);
+    });
+    writableStream.on('finish', function(){
+      console.log('finished writing to ' + filename);
+      resolve(filename);
     });
 
-  var filename = getAbsoluteFilename(commandName, '.csv');
-
-  console.log('saving to ' + filename);
-  var writableStream = fs.createWriteStream(filename);
-  writableStream.on('open', function(fd){
-    console.log('will connect csvStream to writableStream');
-    csvStream.pipe(writableStream);
-  });
-  writableStream.on('error', function(error){
-    console.log('something went wrong with the writableStream');
-    console.log(error);
-  });
-  writableStream.on('finish', function(){
-    console.log('finished writing to ' + filename);
-  });
-
-  _.each(products,function(product){
-    csvStream.write(product);
-  });
-  csvStream.end();
-
-  // TODO: return a Promise
+    _.each(products,function(product){
+      csvStream.write(product);
+    });
+    csvStream.end();
+  })
 };
 
 exports.getAbsoluteFilename = getAbsoluteFilename;
