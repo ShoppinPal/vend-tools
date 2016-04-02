@@ -255,6 +255,7 @@ var exportProductsToCsvFileFormat = function(commandName, products, outlets){
     'variant_option_one_name','variant_option_one_value',
     'variant_option_two_name','variant_option_two_value',
     'variant_option_three_name','variant_option_three_value',
+    'loyalty_value',
     /*'tags',*/'supply_price','retail_price',
     'account_code','account_code_purchase','brand_name',
     'supplier_name','supplier_code','active','track_inventory'];
@@ -275,6 +276,7 @@ var exportProductsToCsvFileFormat = function(commandName, products, outlets){
               'variant_option_one_name','variant_option_one_value',
               'variant_option_two_name','variant_option_two_value',
               'variant_option_three_name','variant_option_three_value',
+              'loyalty_value',
               /*'tags',*/'supply_price','retail_price',
               'account_code','account_code_purchase','brand_name',
               'supplier_name','supplier_code','active','track_inventory');
