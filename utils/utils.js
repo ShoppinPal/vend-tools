@@ -249,16 +249,15 @@ var exportProductsToCsvFileFormat = function(commandName, products, outlets){
   var fs = require('fs');
 
   // NOTE: could also use _.filter() to get keys whose immediate value isn't an object or array
-  var headers = ['id','name','handle','sku',
-    'supply_price','retail_price','tax_name',
-    'loyalty_value',
+  var headers = ['id','handle','sku',
     'composite_handle','composite_sku','composite_quantity',
+    'name'/*,'description'*/,'type',
     'variant_option_one_name','variant_option_one_value',
     'variant_option_two_name','variant_option_two_value',
     'variant_option_three_name','variant_option_three_value',
-    'active'/*'description'*/,'type',/*'tags',*/
-    'brand_name','supplier_name','supplier_code',
-    'account_code','account_code_purchase','track_inventory','reorder_point_Main_Outlet','restock_level_Main_Outlet'];
+    /*'tags',*/'supply_price','retail_price',
+    'account_code','account_code_purchase','brand_name',
+    'supplier_name','supplier_code','active','track_inventory'];
   _.each(outlets, function(outlet){
     headers.push('inventory_'+outlet.name.replace(/ /g, '_'));
     headers.push('reorder_point_'+outlet.name.replace(/ /g, '_'));
@@ -270,16 +269,15 @@ var exportProductsToCsvFileFormat = function(commandName, products, outlets){
     var csvStream = csv
         .createWriteStream({headers: headers})
         .transform(function(product){
-          var neoProduct = _.pick(product,'id','name','handle','sku',
-              'supply_price','retail_price','tax_name',
-              'loyalty_value',
+          var neoProduct = _.pick(product,'id','handle','sku',
               'composite_handle','composite_sku','composite_quantity',
+              'name'/*,'description'*/,'type',
               'variant_option_one_name','variant_option_one_value',
               'variant_option_two_name','variant_option_two_value',
               'variant_option_three_name','variant_option_three_value',
-              'active'/*'description'*/,'type',/*'tags',*/
-              'brand_name','supplier_name','supplier_code',
-              'account_code','account_code_purchase','track_inventory','reorder_point_Main_Outlet','restock_level_Main_Outlet');
+              /*'tags',*/'supply_price','retail_price',
+              'account_code','account_code_purchase','brand_name',
+              'supplier_name','supplier_code','active','track_inventory');
           neoProduct['retail_price'] = product['price'];
           if(product.inventory){
             _.each(product.inventory, function(inventory){
