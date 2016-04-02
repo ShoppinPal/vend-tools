@@ -265,60 +265,62 @@ var exportProductsToCsvFileFormat = function(commandName, products, outlets){
     headers.push('outlet_tax_'+outlet.name.replace(/ /g, '_'));
   });
 
-  var csvStream = csv
-    .createWriteStream({headers: headers})
-    .transform(function(product){
-      var neoProduct = _.pick(product,'id','handle','sku',
-        'composite_handle','composite_sku','composite_quantity',
-        'name'/*,'description'*/,'type',
-        'variant_option_one_name','variant_option_one_value',
-        'variant_option_two_name','variant_option_two_value',
-        'variant_option_three_name','variant_option_three_value',
-        /*'tags',*/'supply_price','retail_price',
-        'account_code','account_code_purchase','brand_name',
-        'supplier_name','supplier_code','active','track_inventory');
-      neoProduct['retail_price'] = product['price'];
-      if(product.inventory){
-        _.each(product.inventory, function(inventory){
-          if(inventory.count !== undefined  && inventory.count !== null) {
-            neoProduct['inventory_' + inventory.outlet_name.replace(/ /g, '_')] = inventory.count;
+  return new Promise(function(resolve, reject){
+    var csvStream = csv
+        .createWriteStream({headers: headers})
+        .transform(function(product){
+          var neoProduct = _.pick(product,'id','handle','sku',
+              'composite_handle','composite_sku','composite_quantity',
+              'name'/*,'description'*/,'type',
+              'variant_option_one_name','variant_option_one_value',
+              'variant_option_two_name','variant_option_two_value',
+              'variant_option_three_name','variant_option_three_value',
+              /*'tags',*/'supply_price','retail_price',
+              'account_code','account_code_purchase','brand_name',
+              'supplier_name','supplier_code','active','track_inventory');
+          neoProduct['retail_price'] = product['price'];
+          if(product.inventory){
+            _.each(product.inventory, function(inventory){
+              if(inventory.count !== undefined  && inventory.count !== null) {
+                neoProduct['inventory_' + inventory.outlet_name.replace(/ /g, '_')] = inventory.count;
+              }
+              if(inventory.reorder_point !== undefined  && inventory.reorder_point !== null) {
+                neoProduct['reorder_point_' + inventory.outlet_name.replace(/ /g, '_')] = inventory.reorder_point;
+              }
+              if(inventory.restock_level !== undefined  && inventory.restock_level !== null) {
+                neoProduct['restock_level_' + inventory.outlet_name.replace(/ /g, '_')] = inventory.restock_level;
+              }
+            });
           }
-          if(inventory.reorder_point !== undefined  && inventory.reorder_point !== null) {
-            neoProduct['reorder_point_' + inventory.outlet_name.replace(/ /g, '_')] = inventory.reorder_point;
-          }
-          if(inventory.restock_level !== undefined  && inventory.restock_level !== null) {
-            neoProduct['restock_level_' + inventory.outlet_name.replace(/ /g, '_')] = inventory.restock_level;
-          }
+          /*if(product.taxes) {
+           // TODO: need additional API lookups to resolve values for outlet_tax_<storeName>
+           }*/
+          return neoProduct;
         });
-      }
-      /*if(product.taxes) {
-       // TODO: need additional API lookups to resolve values for outlet_tax_<storeName>
-      }*/
-      return neoProduct;
+
+    var filename = getAbsoluteFilename(commandName, '.csv');
+
+    console.log('saving to ' + filename);
+    var writableStream = fs.createWriteStream(filename);
+    writableStream.on('open', function(fd){
+      console.log('will connect csvStream to writableStream');
+      csvStream.pipe(writableStream);
+    });
+    writableStream.on('error', function(error){
+      console.log('something went wrong with the writableStream');
+      console.log(error);
+      reject(error);
+    });
+    writableStream.on('finish', function(){
+      console.log('finished writing to ' + filename);
+      resolve(filename);
     });
 
-  var filename = getAbsoluteFilename(commandName, '.csv');
-
-  console.log('saving to ' + filename);
-  var writableStream = fs.createWriteStream(filename);
-  writableStream.on('open', function(fd){
-    console.log('will connect csvStream to writableStream');
-    csvStream.pipe(writableStream);
-  });
-  writableStream.on('error', function(error){
-    console.log('something went wrong with the writableStream');
-    console.log(error);
-  });
-  writableStream.on('finish', function(){
-    console.log('finished writing to ' + filename);
-  });
-
-  _.each(products,function(product){
-    csvStream.write(product);
-  });
-  csvStream.end();
-
-  // TODO: return a Promise
+    _.each(products,function(product){
+      csvStream.write(product);
+    });
+    csvStream.end();
+  })
 };
 
 exports.getAbsoluteFilename = getAbsoluteFilename;

@@ -91,10 +91,31 @@ var getOauthInfo = function(nconf){
 
 var getSettingsInfo = function(nconf){
   var settings = {};
+  settings["credentials"]={};
   return chooseDefaultOutputDirectory(nconf, settings)
     .tap(function () {
       return chooseTimestampFiles(settings);
     })
+      .then(function(){
+          return asking.askAsync('Please provide your email: ');
+      })
+      .tap(function(resolvedResults){
+        settings["credentials"]["email"] = resolvedResults;
+    })
+      .then(function(){
+          return asking.askAsync('Please provide your password: ');
+      })
+      .tap(function(resolvedResults){
+          settings["credentials"]["password"] = resolvedResults;
+      })
+      .then(function(){
+          return asking.askAsync('Please provide your warehouse URL: ');
+      })
+      .tap(function(resolvedResults){
+          settings.loopbackServerUrl = resolvedResults;
+      })
+
+
     .then(function () {
       return fileSystem.write(
         path.join(__dirname, '..', 'settings.json'),
