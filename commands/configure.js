@@ -97,22 +97,22 @@ var getSettingsInfo = function(nconf){
       return chooseTimestampFiles(settings);
     })
       .then(function(){
-          return asking.askAsync('Please provide your email: ');
+          return asking.askAsync('Please provide a URL such as http(s)://my.warehouse.com that points to your warehouse: ');
+      })
+      .tap(function(resolvedResults){
+          settings.loopbackServerUrl = resolvedResults;
+      })
+      .then(function(){
+          return asking.askAsync('Please provide your warehouse login email ID: ');
       })
       .tap(function(resolvedResults){
         settings["credentials"]["email"] = resolvedResults;
     })
       .then(function(){
-          return asking.askAsync('Please provide your password: ');
+          return asking.askAsync('Please provide your warehouse login password: ');
       })
       .tap(function(resolvedResults){
           settings["credentials"]["password"] = resolvedResults;
-      })
-      .then(function(){
-          return asking.askAsync('Please provide your warehouse URL: ');
-      })
-      .tap(function(resolvedResults){
-          settings.loopbackServerUrl = resolvedResults;
       })
 
 
