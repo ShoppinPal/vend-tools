@@ -30,6 +30,14 @@ report-costs-for-suppliers  Report the costs for each supplier per outlet
 
 Pre-requisites for Windows7
 ===========================
+
+## Quickie
+1. Install Docker for windows
+2. `docker run -t -i pulkitsinghal/vend-tools:latest /bin/bash`
+3. Once it downloads the image and runs the container, you can now perform configuration via: `vend-tools configure`
+4. Start using from anywhere in the container's command-line/terminal: `vend-tools`
+
+## Deprecated:
 1. Download git from `http://git-scm.com/download/win` and install it
 2. Open `cmd` (please do so as an admin)
 3. `git clone git://github.com/hakobera/nvmw.git "%HOMEDRIVE%%HOMEPATH%\.nvmw"`
