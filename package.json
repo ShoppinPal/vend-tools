@@ -32,7 +32,7 @@
     "shoppinpal-warehouse-mongo": "~1.0.10",
     "tracer": "0.8.2",
     "underscore": "1.7.0",
-    "vend-nodejs-sdk": "1.0.17",
+    "vend-nodejs-sdk": "1.0.18",
     "yo": "~1.7.0"
   },
   "bin": {

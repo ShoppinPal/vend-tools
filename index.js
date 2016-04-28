@@ -19,4 +19,12 @@ var program = ronin({
   }
 });
 
+if (process.env['User-Agent']) {
+  process.env['User-Agent'] += '.vend-tools';
+}
+else {
+  process.env['User-Agent'] = 'vend-tools';
+}
+console.log('process.env[\'User-Agent\']', process.env['User-Agent']);
+
 program.run();
