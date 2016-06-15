@@ -15,8 +15,9 @@ var params = null;
 var client = null;
 var remotes = null;
 
-var outletsById = [];
 var outletsByName = [];
+var brandNames = [];
+var outlets=[];
 
 var source_outlet = "";
 var destination_outlet = "";
@@ -98,63 +99,78 @@ var CreateStockTransfer = Command.extend({
                     .then(function (response) {
                         //console.log(response);
                         response.outlets.forEach(function (singleOutlet) {
-                            outletsById.push(singleOutlet.id);
+                            outlets.push({id:singleOutlet.id,name:singleOutlet.name})
                             outletsByName.push(singleOutlet.name);
                         });
                         //console.log("ID:",outletsById);
                         //console.log("Name:",outletsByName);
-                        return getOutletChoice()
+                        return getSourceOutletChoice()
                             .then(function () {
-                                console.log(source_outlet, destination_outlet);
+                                console.log(source_outlet);
+                                return getDestinationOutletChoice()
+                                    .then(function(){
+                                        console.log(destination_outlet);
+                                    })
                             })
+
                     });
 
             })
-            .then(function getBrands(){
+            .then(function getBrands() {
 
                 var connectionInfo = utils.loadOauthTokens();
                 return vendSdk.products.fetchAll(connectionInfo)
-                    .then(function(products){
+                    .then(function (products) {
                         console.log(products.length);
-                        var brandNames = [];
-                        products.forEach(function(singleProduct){
-                           if(brandNameExists(singleProduct.brand_name,brandNames))
-                           {
-                                brandNames.push(singleProduct.brand_name);
-                           }
+
+                        products.forEach(function (singleProduct) {
+                            if (singleProduct.brand_name != "") {
+                                if (!(brandNameExists(singleProduct.brand_name, brandNames))) {
+                                    brandNames.push(singleProduct.brand_name);
+                                }
+                            }
 
                         });
-                        console.log(brandNames);
-                    });
-/*
-                        var argsForBrandFetch = {where:{brand_name:"T-WE TEA"}};
-                        //var undefinedFilter = {where:{inventory:undefined}};
-                        var filteredProducts = loopback_filter(response,argsForBrandFetch);
 
-                        //var filteredProducts = loopback_filter(response.products,undefinedFilter);
-                        var outlet_id = "b8ca3a6e-72a7-11e4-efc6-42e8c7021d82";//NYC
-                        var source_outlet_id = "aea67e1a-b85c-11e2-a415-bc764e10976c";//ShoppinPal OKC
+                        return getBrandChoice()
+                            .then(function () {
+                                console.log(brand);
+                                return Promise.resolve(products);
+                            });
+                    });
+
+            })
+            .tap(function stockTransfer(products){
+
+
+                        var argsForBrandFetch = {where:{brand_name:brand}};
+                        var filteredProducts = loopback_filter(products,argsForBrandFetch);
+                        //console.log(filteredProducts.length);
+                        var destination_outlet_id = outlets[getIndexOfOutletId(destination_outlet,outlets)].id;
+                        var source_outlet_id = outlets[getIndexOfOutletId(source_outlet,outlets)].id;
+                        //console.log(destination_outlet_id);
+                        //console.log(source_outlet_id);
                         var toBeTransferred = [];
                         filteredProducts.forEach(function(singleProduct){
                             if(singleProduct.inventory != undefined){
                                var singleProductInventory = singleProduct.inventory;
                                singleProductInventory.forEach(function(inv){
 
-                                   if(inv.outlet_id == outlet_id)
+                                   if(inv.outlet_id == destination_outlet_id)
                                    {
 
 
                                         if(parseInt(inv.count)<=inv.reorder_point && inv.count>0){
-                                            console.log(singleProduct.name, 'needs to be ordered in quantity of : ',inv.restock_level-inv.count);
+                                            console.log(singleProduct.name, 'needs to be ordered in quantity of : ',inv.reorder_point-inv.count);
 
-                                            toBeTransferred.push({'id':singleProduct.id,'toBeOrdered' : inv.restock_level-inv.count});
+                                            toBeTransferred.push({'product_id':singleProduct.id,'name':singleProduct.name,'count' : inv.reorder_point-inv.count,'cost':1000});
                                         }
                                    }
                                });
                             }
                         });
 
-                        console.log(toBeTransferred);
+                        //console.log(toBeTransferred);
                         filteredProducts.forEach(function(singleProduct){
                             if(singleProduct.inventory != undefined){
                                 var singleProductInventory = singleProduct.inventory;
@@ -166,7 +182,7 @@ var CreateStockTransfer = Command.extend({
 
                                         if(index!=-1)
                                         {
-                                            if(toBeTransferred[index].toBeOrdered <= inv.count)
+                                            if(toBeTransferred[index].count <= inv.count)
                                             {
                                                 console.log(singleProduct.name);
                                             }
@@ -177,39 +193,17 @@ var CreateStockTransfer = Command.extend({
 
                                 })
                             }
-                        })
+                        });
 
 
+                var connectionInfo = utils.loadOauthTokens();
 
-                    });*/
-
-                /*                var argsForCreateConsignment = {
-                    name:{value:"TestTrans2"},
-                    dueAt:{value:"2016-06-15"},
-                    outletId:{value:"aea67e1a-b85c-11e2-a415-bc764e10976c"},
-                    sourceId:{value:"b8ca3a6e-72a7-11e4-efc6-42e8c7021d82"},
-                    products:{value:[
-                        {
-                            "id": "b743d528-6b63-102e-bfb4-6e9396395811",
-                            "product_id": "c4fd01fc-c634-11e3-a0f5-b8ca3a64f8f4",
-                            "name": "CUP - Ville de Plouc",
-                            "count": 10,
-                            "received": 10,
-                            "cost": "1.00",
-                            "created_at": "2016-06-14 04:06:42",
-                            "updated_at": "2016-06-14 04:06:42"
-                        },
-                        {
-                            "id": "b744d9a0-6b63-102e-bfb4-6e9396395811",
-                            "product_id": "c534e683-c634-11e3-a0f5-b8ca3a64f8f4",
-                            "name": "CUP - You",
-                            "count": 10,
-                            "received": 10,
-                            "cost": "400.00",
-                            "created_at": "2016-06-14 04:06:42",
-                            "updated_at": "2016-06-14 04:06:42"
-                        }
-                    ]}
+                                var argsForCreateConsignment = {
+                    name:{value:"TestWithAll2"},
+                    dueAt:{value:"2016-06-17"},
+                    outletId:{value:destination_outlet_id},
+                    sourceId:{value:source_outlet_id},
+                    products:{value:toBeTransferred}
                 };
 
                 var consignment = vendSdk.consignments.stockOrders.stockTransfer(argsForCreateConsignment,connectionInfo)
@@ -217,73 +211,10 @@ var CreateStockTransfer = Command.extend({
                     .then(function (consignments) {
                         console.log(consignments);
                     })
-*/
-                /*var outlet = vendSdk.outlets.fetch({},connectionInfo)
-                    .then(function(response)
-                    {
-                        console.log(response);
-                        response.outlets.forEach(function(singleOutlet){
-                            outletsById.push(singleOutlet.id);
-                            outletsByName.push(singleOutlet.name);
-                        });
-                        console.log("ID:",outletsById);
-                        console.log("Name:",outletsByName);
-
-
-
-
-                        return Promise.resolve();
-                    });
-*/
-
 
 
             })
-/*            .then(function getConsignments() {
-                //get consignments to find products on the consignment for maximum 2 weeks
-                console.log("ID:",outletsById);
-                console.log("Name:",outletsByName);
-                console.log("Source : ",source_outlet);
-*/
-/*
-                return asking.chooseAsync('Choose source outlet', outletsByName)
-                    .then(function (resolvedResults/*err, selectedValue, indexOfSelectedValue) {
-                        var selectedValue = resolvedResults[0];
-                        var indexOfSelectedValue = resolvedResults[1];
-                        console.log(selectedValue, indexOfSelectedValue);
-                    })*/
-                        /*if (selectedValue === 'Yes') {
-                            var connectionInfo = utils.loadOauthTokens();
 
-                            var connectionInfo = utils.loadOauthTokens();
-                            console.log(connectionInfo);
-                        }
-                    })
-                    .catch(function(e) {
-                        //console.error(commandName + ' > An unexpected error occurred: ', e);
-                        console.log('Incorrect selection! Please choose 1 or 2');
-                        return getChoiceForConfirmingDeletion();
-                    });
-                var argsForCreateConsignment = {
-                    name:{value:"TestTransfer"},
-                    dueAt:{value:"2016-06-15"},
-                    outletId:{value:"aea67e1a-b85c-11e2-a415-bc764e10976c"},
-                    sourceId:{value:"b8ca3a6e-72a7-11e4-efc6-42e8c7021d82"}
-                };
-
-                var consignments = vendSdk.consignments.stockOrders.stockTransfer(argsForCreateConsignment,connectionInfo)
-
-                    .then(function (consignments) {
-                      //console.log(consignments);
-
-                        //var dateFilter = {where: {consignment_date: {gt: '2016-01-01'}}};
-                        //var filteredConsignments = loopback_filter(consignments,dateFilter);
-                        console.log(consignments);
-                    })
-
-
-*/
-            //})
             .catch(function (error) {
                 console.error('2nd last dot-catch block');
                 console.log(commandName, 'ERROR', error.stack);
@@ -298,7 +229,7 @@ var CreateStockTransfer = Command.extend({
 function productIdExists(productId, array) {
     var i = null;
     for (i = 0; array.length > i; i += 1) {
-        if (array[i].id === productId) {
+        if (array[i].product_id === productId) {
             return i;
         }
     }
@@ -309,7 +240,7 @@ function productIdExists(productId, array) {
 function brandNameExists(brandName, array) {
     var i = null;
     for (i = 0; array.length > i; i += 1) {
-        if (array[i] === brandName) {
+        if (array[i] == brandName) {
             return true;
         }
     }
@@ -318,25 +249,53 @@ function brandNameExists(brandName, array) {
 };
 
 
-var getOutletChoice = function(){
-    console.log('in getOutletChoice');
+var getSourceOutletChoice = function(){
+
     return asking.chooseAsync('Choose source outlet : ',outletsByName)
         .tap(function(resolvedResults){
             source_outlet = resolvedResults[0];
             var index = outletsByName.indexOf(resolvedResults[0]);
             outletsByName.splice(index,1);
         })
-        .then(function(){
-            return asking.chooseAsync('Choose destination outlet : ',outletsByName);
-        })
+        .catch(function (error) {
+            console.log('Incorrect selection! Please choose correct option');
+            return getSourceOutletChoice();
+        });
+
+};
+
+var getDestinationOutletChoice = function(){
+    return asking.chooseAsync('Choose destination outlet : ',outletsByName)
         .tap(function(resolvedResults){
             destination_outlet = resolvedResults[0];
         })
         .catch(function (error) {
-            console.log('Incorrect selection! Please choose 1 or 2');
-            return getOutletChoice();
+            console.log('Incorrect selection! Please choose correct option');
+            return getDestinationOutletChoice();
+        });
+}
+
+function getIndexOfOutletId(outletName,outlets){
+    var i = null;
+    for (i = 0; outlets.length > i; i += 1) {
+        if (outlets[i].name == outletName) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+var getBrandChoice = function(){
+
+    return asking.chooseAsync('Choose brand : ',brandNames)
+        .tap(function(resolvedResults){
+            brand = resolvedResults[0];
+        })
+        .catch(function (error) {
+            console.log('Incorrect selection! Please choose proper option');
+            return getBrandChoice();
         });
 
-}
+};
 
 module.exports = CreateStockTransfer;
