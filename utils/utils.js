@@ -6,10 +6,15 @@ var _ = require('underscore');
 var path = require('path');
 var vendSdk = require('vend-nodejs-sdk')({});
 
-var updateOauthTokens = function(connectionInfo){
+var updateOauthTokens = function(connectionInfo, domain){
   console.log('updating oauth.json ... in case there might have been token changes');
   //console.log('connectionInfo: ' + JSON.stringify(connectionInfo,null,2));
+
   var oauthFile = path.join(__dirname, '..', 'oauth.json');
+  if (domain) {
+    oauthFile = path.join(__dirname, '..', 'oauth.'+domain+'.json');
+  }
+
   console.log('oauthFile: ' + oauthFile);
   return fileSystem.write(
     oauthFile,
@@ -26,8 +31,13 @@ var loadOauthTokens = function(token, domain){
   // (1) Check for oauth.json and client.json via nconf
   var nconf = require('nconf');
   if (domain) {
-    nconf.file('client', { file: path.join(__dirname, '..', 'client.'+domain+'.json') })
-      .file('oauth', { file: path.join(__dirname, '..', 'oauth.'+domain+'.json') });
+    var clientFile= path.join(__dirname, '..', 'client.'+domain+'.json');
+    var oauthFile = path.join(__dirname, '..', 'oauth.'+domain+'.json');
+    console.log('clientFile: ' + clientFile);
+    console.log('oauthFile: ' + oauthFile);
+    nconf.file('client', { file: clientFile})
+      .file('oauth', { file: oauthFile});
+    console.log('using domain: ' + domain);
   }
   else {
     nconf.file('client', { file: path.join(__dirname, '..', 'client.json') })

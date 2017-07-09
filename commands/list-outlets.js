@@ -22,7 +22,7 @@ var ListOutlets = Command.extend({
 
     return vendSdk.outlets.fetch({}, connectionInfo)
       .tap(function(consignments) {
-        return utils.updateOauthTokens(connectionInfo);
+        return utils.updateOauthTokens(connectionInfo, domain);
       })
       .then(function(outletsResponse) {
         console.log(commandName + ' > outletsResponse.outlets.length: ', outletsResponse.outlets.length);
