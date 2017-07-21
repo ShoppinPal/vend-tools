@@ -12,17 +12,20 @@ var DeleteConsignmentProduct = Command.extend({
   desc: 'Delete consignment products with receive qty 0',
 
   options: {
-    //id: 'string'
+    status: 'string',
+    type: 'string'
   },
 
-  run: function () {
+  run: function (status,type) {
     var commandName = path.basename(__filename, '.js');
-    var token = this.global.token;
-    var domain = this.global.domain;
 
-    var connectionInfo = utils.loadOauthTokens(token, domain);
+    if(!status || !type){
+      throw new Error('--status and --type should be set');
+    }
+
+    var connectionInfo = utils.loadOauthTokens();
     //var consignments = require('../downloadedConsignments.json');
-    
+    var receiveQtyZeroConsignmentProducts = [];
     return vendSdk.consignments.stockOrders.fetchAll(connectionInfo)
       .tap(function(response) {
         
@@ -32,7 +35,7 @@ var DeleteConsignmentProduct = Command.extend({
         
         if (consignments) {
         
-          var filteredConsignments = _.where(consignments,{"status":"SENT","type":"SUPPLIER"});
+          var filteredConsignments = _.where(consignments,{"status":status,"type":type});
 
           var lastSunday = moment().day(-7).format('YYYY-MM-DD HH:mm:ss');
           var dateFilteredConsignments = _.filter(filteredConsignments,function(singleConsignment){
@@ -46,7 +49,7 @@ var DeleteConsignmentProduct = Command.extend({
             dateFilteredConsignments,
             function(singleConsignment){
 
-              var receiveQtyZeroConsignmentProducts = [];
+              
               var receiveQtyZeroConsignmentProductsCount = 0;
               var deletedConsignmentProductsCount = 0;
               var argsForConsignmentProduct = {
@@ -56,14 +59,15 @@ var DeleteConsignmentProduct = Command.extend({
               return vendSdk.consignments.products.fetchAllByConsignment(argsForConsignmentProduct,connectionInfo)
               .then(function(consignmentProducts) {
                 
-                consignmentProducts.forEach(function(singleConsignmentProduct){
+                receiveQtyZeroConsignmentProducts.push(consignmentProducts);
+                /*consignmentProducts.forEach(function(singleConsignmentProduct){
                   if(parseFloat(singleConsignmentProduct.count) > 0 && singleConsignmentProduct.received == undefined){
                     receiveQtyZeroConsignmentProductsCount += 1;  
                     receiveQtyZeroConsignmentProducts.push({'consignmentProduct':singleConsignmentProduct,'consignmentProductScriptState':'identified'});
                   }
-                });
+                });*/
                 
-                return Promise.map(
+                /*return Promise.map(
                   receiveQtyZeroConsignmentProducts,
                   function(singleConsignmentProductToDelete){
                     var argsToDeleteConsignmentProduct = {apiId:{value : singleConsignmentProductToDelete.consignmentProduct.id}};
@@ -117,7 +121,7 @@ var DeleteConsignmentProduct = Command.extend({
                     console.log(commandName + ' > An unexpected error occurred: ', error);
                     return Promise.reject(commandName + ' > An unexpected error occurred: ', error);
                   }) 
-                
+                */
               })
               .catch(function(error){
                 console.log(commandName + 'Error while fetching consignment products.\n'+error);
@@ -129,7 +133,7 @@ var DeleteConsignmentProduct = Command.extend({
             )
             .then(function(){
               console.log("Done processing.");
-              return Promise.resolve();
+              return utils.exportToJsonFileFormat(commandName,receiveQtyZeroConsignmentProducts);
             })
             .catch(function(error){
               console.log(commandName + ' > An unexpected error occurred: ', error);
