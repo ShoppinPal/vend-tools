@@ -25,7 +25,7 @@ var DeleteConsignmentProduct = Command.extend({
 
     var connectionInfo = utils.loadOauthTokens();
     //var consignments = require('../downloadedConsignments.json');
-    var receiveQtyZeroConsignmentProducts = [];
+    
     return vendSdk.consignments.stockOrders.fetchAll(connectionInfo)
       .tap(function(response) {
         
@@ -49,7 +49,7 @@ var DeleteConsignmentProduct = Command.extend({
             dateFilteredConsignments,
             function(singleConsignment){
 
-              
+              var receiveQtyZeroConsignmentProducts = [];
               var receiveQtyZeroConsignmentProductsCount = 0;
               var deletedConsignmentProductsCount = 0;
               var argsForConsignmentProduct = {
@@ -60,14 +60,14 @@ var DeleteConsignmentProduct = Command.extend({
               .then(function(consignmentProducts) {
                 
                 receiveQtyZeroConsignmentProducts.push(consignmentProducts);
-                /*consignmentProducts.forEach(function(singleConsignmentProduct){
+                consignmentProducts.forEach(function(singleConsignmentProduct){
                   if(parseFloat(singleConsignmentProduct.count) > 0 && singleConsignmentProduct.received == undefined){
                     receiveQtyZeroConsignmentProductsCount += 1;  
                     receiveQtyZeroConsignmentProducts.push({'consignmentProduct':singleConsignmentProduct,'consignmentProductScriptState':'identified'});
                   }
-                });*/
+                });
                 
-                /*return Promise.map(
+                return Promise.map(
                   receiveQtyZeroConsignmentProducts,
                   function(singleConsignmentProductToDelete){
                     var argsToDeleteConsignmentProduct = {apiId:{value : singleConsignmentProductToDelete.consignmentProduct.id}};
@@ -121,7 +121,7 @@ var DeleteConsignmentProduct = Command.extend({
                     console.log(commandName + ' > An unexpected error occurred: ', error);
                     return Promise.reject(commandName + ' > An unexpected error occurred: ', error);
                   }) 
-                */
+                
               })
               .catch(function(error){
                 console.log(commandName + 'Error while fetching consignment products.\n'+error);
