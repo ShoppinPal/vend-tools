@@ -59,7 +59,6 @@ var DeleteConsignmentProduct = Command.extend({
               return vendSdk.consignments.products.fetchAllByConsignment(argsForConsignmentProduct,connectionInfo)
               .then(function(consignmentProducts) {
                 
-                receiveQtyZeroConsignmentProducts.push(consignmentProducts);
                 consignmentProducts.forEach(function(singleConsignmentProduct){
                   if(parseFloat(singleConsignmentProduct.count) > 0 && singleConsignmentProduct.received == undefined){
                     receiveQtyZeroConsignmentProductsCount += 1;  
@@ -133,7 +132,7 @@ var DeleteConsignmentProduct = Command.extend({
             )
             .then(function(){
               console.log("Done processing.");
-              return utils.exportToJsonFileFormat(commandName,receiveQtyZeroConsignmentProducts);
+              return Promise.resolve();
             })
             .catch(function(error){
               console.log(commandName + ' > An unexpected error occurred: ', error);
