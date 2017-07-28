@@ -18,23 +18,25 @@ var DeleteConsignmentProduct = Command.extend({
 
   run: function (status,type) {
     var commandName = path.basename(__filename, '.js');
+    var token = this.global.token;
+    var domain = this.global.domain;
 
     if(!status || !type){
       throw new Error('--status and --type should be set');
     }
 
-    var connectionInfo = utils.loadOauthTokens();
+    var connectionInfo = utils.loadOauthTokens(token, domain);
     //var consignments = require('../downloadedConsignments.json');
-    
+
     return vendSdk.consignments.stockOrders.fetchAll(connectionInfo)
       .tap(function(response) {
         
         return utils.updateOauthTokens(connectionInfo);
       })
       .then(function(consignments) {
-        
+
         if (consignments) {
-        
+
           var filteredConsignments = _.where(consignments,{"status":status,"type":type});
 
           var lastSunday = moment().day(-7).format('YYYY-MM-DD HH:mm:ss');
