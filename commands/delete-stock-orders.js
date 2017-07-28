@@ -13,7 +13,10 @@ var path = require('path');
 var commandName = path.basename(__filename, '.js'); // gives the filename without the .js extension
 
 var DeleteStockOrders = Command.extend({
-  desc: 'Delete a Stock Order',
+  desc: 'Downloads consignments and prompts you to choose one for removal.' + '\n' +
+        '\t\t\t\t\t--status [RECEIVED|OPEN|CANCELLED|STOCKTAKE_COMPLETE|STOCKTAKE|SENT]' + '\n' +
+        '\t\t\t\t\t         Optionally, you can specify a `--status` to filter the' + '\n' +
+        '\t\t\t\t\t         list of consignments, before they are presented.',
 
   options: { // must not clash with global aliases: -t -d -f
     status: {
