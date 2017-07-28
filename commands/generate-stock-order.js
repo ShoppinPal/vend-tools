@@ -92,7 +92,7 @@ var GenerateStockOrder = Command.extend({
     return validateSupplier(supplierId, connectionInfo)
       .tap(function(resolvedSupplierId) {
         //console.log(commandName + ' > 1st tap block');
-        return utils.updateOauthTokens(connectionInfo);
+        return utils.updateOauthTokens(connectionInfo, domain);
       })
       .then(function(resolvedSupplierId){
         supplierId = resolvedSupplierId;

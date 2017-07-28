@@ -19,8 +19,8 @@ var ListOutlets = Command.extend({
 
     var connectionInfo = utils.loadOauthTokens(token, domain);
 
-
-    return vendSdk.outlets.fetch({}, connectionInfo)
+    var args = vendSdk.args.outlets.fetch();
+    return vendSdk.outlets.fetch(args, connectionInfo)
       .tap(function(consignments) {
         return utils.updateOauthTokens(connectionInfo, domain);
       })
