@@ -62,7 +62,7 @@ var DeleteConsignmentProduct = Command.extend({
               .then(function(consignmentProducts) {
                 
                 consignmentProducts.forEach(function(singleConsignmentProduct){
-                  if(parseFloat(singleConsignmentProduct.count) > 0 && singleConsignmentProduct.received == undefined){
+                  if((singleConsignmentProduct.received == undefined || singleConsignmentProduct.received == 0)){
                     receiveQtyZeroConsignmentProductsCount += 1;  
                     receiveQtyZeroConsignmentProducts.push({'consignmentProduct':singleConsignmentProduct,'consignmentProductScriptState':'identified'});
                   }
