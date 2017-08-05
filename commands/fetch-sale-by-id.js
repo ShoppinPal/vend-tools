@@ -28,15 +28,11 @@ var FetchSaleById = Command.extend({
     args.apiId.value = id;
     return vendSdk.sales.fetchById(args, connectionInfo)
       .tap(function (response) {
-        console.log(commandName + ' > 1st then block');
         return utils.updateOauthTokens(connectionInfo);
       })
       .then(function (response) {
-        console.log(commandName + ' > 2nd then block');
-        //console.log(commandName + ' > response.products[0]: ' + JSON.stringify(response.products[0],vendSdk.replacer,2));
-        
         if (response.data) {
-          console.log(commandName + ' > 1 matching results were found.');
+          console.log(commandName + ' > A match was found.');
           return utils.exportToJsonFileFormat(commandName, response.data);
         }
         else {
