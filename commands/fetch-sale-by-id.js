@@ -23,7 +23,7 @@ var FetchSaleById = Command.extend({
     }
     var connectionInfo = utils.loadOauthTokens(token, domain);
     
-    // fetch a product by ID
+    // fetch a sale by ID
     var args = vendSdk.args.sales.fetchById();
     args.apiId.value = id;
     return vendSdk.sales.fetchById(args, connectionInfo)
