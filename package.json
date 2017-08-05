@@ -28,11 +28,11 @@
     "nconf": "0.7.1",
     "open": "0.0.5",
     "q-io": "1.11.6",
-    "ronin": "0.3.9",
+    "ronin": "https://github.com/pulkitsinghal/ronin.git",
     "shoppinpal-warehouse-mongo": "~1.0.10",
     "tracer": "0.8.2",
     "underscore": "1.7.0",
-    "vend-nodejs-sdk": "1.1.1",
+    "vend-nodejs-sdk": "git+https://github.com/ShoppinPal/vend-nodejs-sdk.git#develop",
     "yo": "~1.7.0"
   },
   "bin": {
