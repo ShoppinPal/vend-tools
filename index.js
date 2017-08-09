@@ -2,7 +2,9 @@ var ronin = require('ronin');
 
 var program = ronin({
   path: __dirname,
-  desc: 'This command-line-interface (CLI) allows you to easily perform custom tasks for your vendhq.com instance.',
+  desc: 'This command-line-interface (CLI) allows you to easily perform custom tasks for your vendhq.com instance.' +
+  '\n\t' + 'Usage:' +
+  '\n\t\t' + 'vend-tools COMMAND --domain <vendSubDomain> [OPTIONS]',
   options: {
     token: {
       type: 'string',

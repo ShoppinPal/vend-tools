@@ -46,12 +46,16 @@ var DeleteUnreceivedProductsFromOrder = Command.extend({
         .then(function(consignmentProducts) {
 
           consignmentProducts.forEach(function(singleConsignmentProduct){
-            if ( (singleConsignmentProduct.received == undefined || singleConsignmentProduct.received == 0) ) {
+            if (!singleConsignmentProduct.count || parseFloat(singleConsignmentProduct.count) <= 0) {
+              console.log('\nWARN: HOW WOULD ONE GET IN SUCH A SITUATION?\n', singleConsignmentProduct);
+            }
+            else if (
+              singleConsignmentProduct.received === undefined ||
+              singleConsignmentProduct.received === null ||
+              singleConsignmentProduct.received === 0
+            ) {
               receiveQtyZeroConsignmentProductsCount += 1;
               receiveQtyZeroConsignmentProducts.push({'consignmentProduct':singleConsignmentProduct,'consignmentProductScriptState':'identified'});
-            }
-            else if (parseFloat(singleConsignmentProduct.count) <= 0) {
-              console.log('\nWARN: HOW WOULD ONE GET IN SUCH A SITUATION?\n', singleConsignmentProduct);
             }
           });
 
