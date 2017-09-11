@@ -184,7 +184,8 @@ var validateOutlet = function(outletId, connectionInfo) {
 };
 
 var fetchOutlets = function(connectionInfo){
-  return vendSdk.outlets.fetch({}, connectionInfo)
+  var args = vendSdk.args.outlets.fetch();
+  return vendSdk.outlets.fetch(args, connectionInfo)
     .then(function(outletsResponse) {
       //console.log('outletsResponse: ', outletsResponse);
       console.log('outletsResponse.outlets.length: ', outletsResponse.outlets.length);
