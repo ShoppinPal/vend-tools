@@ -32,7 +32,7 @@
     "shoppinpal-warehouse-mongo": "~1.0.10",
     "tracer": "0.8.2",
     "underscore": "1.7.0",
-    "vend-nodejs-sdk": "git+https://github.com/ShoppinPal/vend-nodejs-sdk.git#develop",
+    "vend-nodejs-sdk": "git+https://github.com/ShoppinPal/vend-nodejs-sdk.git#fix/ritik/depreciation/consignmentApi",
     "yo": "~1.7.0"
   },
   "bin": {
